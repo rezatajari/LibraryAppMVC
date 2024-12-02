@@ -2,5 +2,8 @@
 {
     public interface IBookService
     {
+        void Add();
+        void Remove();
+        void Search();
     }
 }

@@ -1,8 +1,14 @@
+using LibraryAppMVC.Data;
+using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddTransient<BookService, BookService>();
+builder.Services.AddDbContext<LibraryDB>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDB")));
+
+builder.Services.AddTransient<IBookService, BookService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -27,6 +33,4 @@ app.MapControllerRoute(
 app.Run();
 
 
-// TODO: implementation IBookServeces
-// TODO: implementation BookServeces
 // TODO: implementation LibraryController
