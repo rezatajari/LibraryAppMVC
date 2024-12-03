@@ -1,6 +1,7 @@
 ﻿using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
 using LibraryAppMVC.Services;
+using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAppMVC.Controllers
@@ -20,17 +21,32 @@ namespace LibraryAppMVC.Controllers
         }
 
         [Route("library/Add")]
+        [HttpGet]
+        public IActionResult Add()
+        {
+            return View();
+        }
+
+        [Route("library/Add")]
         [HttpPost]
-        public IActionResult Add(Book newBook)
+        public IActionResult Add(AddBookViewModel newBook)
         {
             if (!ModelState.IsValid)
             {
                 return View(newBook);
             }
 
-            _bookService.Add(newBook);
+            Book book = new Book()
+            {
+                Title = newBook.Title,
+                Author = newBook.Author,
+                Genre = newBook.Genre,
+            };
 
-            return View();
+            _bookService.Add(book);
+
+            TempData["SuccessMessage"] = "Book added successfully!";
+            return RedirectToAction("Add");
         }
 
         [Route("library/remove")]
