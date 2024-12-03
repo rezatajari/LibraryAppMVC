@@ -1,5 +1,8 @@
 ﻿using LibraryAppMVC.Data;
 using LibraryAppMVC.Interfaces;
+using LibraryAppMVC.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace LibraryAppMVC.Services
 {
@@ -11,12 +14,20 @@ namespace LibraryAppMVC.Services
         {
             _libraryDB = libraryDB;
         }
-        public void Add()
+        public void Add(Book newBook)
         {
+            try
+            {
+                _libraryDB.Books.Add(newBook);
+            }
+            catch (Exception err)
+            {
 
+               // return View(err.Message);
+            }
         }
 
-        public void Remove()
+        public void Remove(Book newBook)
         {
         }
 
