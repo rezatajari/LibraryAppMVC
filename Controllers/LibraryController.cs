@@ -1,5 +1,6 @@
 ﻿using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
+using LibraryAppMVC.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAppMVC.Controllers
@@ -12,8 +13,8 @@ namespace LibraryAppMVC.Controllers
             _bookService = bookService;
         }
 
-        [Route("Index")]
-        public IActionResult Index()
+        [Route("library/home")]
+        public IActionResult Home()
         {
             return View();
         }
@@ -27,23 +28,40 @@ namespace LibraryAppMVC.Controllers
                 return View(newBook);
             }
 
+            _bookService.Add(newBook);
+
             return View();
         }
 
-        public IActionResult Remove()
+        [Route("library/remove")]
+        [HttpPost]
+        public IActionResult Remove(Book book)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(book);
+            }
+
+            _bookService.Remove(book);
+
             return View();
         }
 
+        [Route("library/list")]
+        [HttpGet]
         public IActionResult List()
         {
-            return View();
+            List<Book> books = _bookService.GetAll();
+            return View(books);
         }
 
-        public IActionResult Search()
+        [Route("library/searchbytitle/{title}")]
+        [HttpGet]
+        public IActionResult SearchById(string title)
         {
-            return View();
-        }
+            List<Book> books = _bookService.SearchByTitle(title);
 
+            return View(books);
+        }
     }
 }

@@ -2,11 +2,12 @@
 
 namespace LibraryAppMVC.Interfaces
 {
-    public interface IBookService
+    public interface IBookRepository
     {
-        void Add(Book newBook);
-        void Remove(Book newBook);
+        void Add(Book book);
+        void Remove(Book book);
         List<Book> GetAll();
         List<Book> SearchByTitle(string title);
+        bool ExistValidation(Book book);
     }
 }
