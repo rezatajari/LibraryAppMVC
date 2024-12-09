@@ -10,8 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<LibraryDB>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDB")));
 
-builder.Services.AddTransient<IBookRepository, BookRepository>();
 builder.Services.AddTransient<IBookService, BookService>();
+builder.Services.AddTransient<IBookRepository, BookRepository>();
+builder.Services.AddTransient<IAccountService, AccountService>();
+builder.Services.AddTransient<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<BookValidator>();
 
 // Add services to the container.
@@ -32,7 +34,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Library}/{action=Home}");
+    pattern: "{controller=Home}/{action=Index}");
 
 app.Run();
 

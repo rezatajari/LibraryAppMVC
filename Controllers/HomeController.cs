@@ -2,7 +2,7 @@
 
 namespace LibraryAppMVC.Controllers
 {
-    public class UserController : Controller
+    public class HomeController : Controller
     {
         public IActionResult Index()
         {
