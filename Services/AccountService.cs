@@ -1,4 +1,5 @@
 ﻿using LibraryAppMVC.Interfaces;
+using LibraryAppMVC.Models;
 using LibraryAppMVC.ViewModels;
 
 namespace LibraryAppMVC.Services
@@ -11,9 +12,28 @@ namespace LibraryAppMVC.Services
             _accountRepository = accountRepository;
         }
 
-        public bool Login(LoginViewModel model)
+        public async Task<bool> Login(LoginViewModel model)
         {
-            return _accountRepository.Login(model);
+            return await _accountRepository.Login(model);
+        }
+        public async Task<bool> CheckUserExist(string email, string password)
+        {
+            return await _accountRepository.CheckUserExist(email, password);
+        }
+
+        public async Task<bool> Register(RegisterViewModel model)
+        {
+            var user = new User()
+            {
+                UserName = model.UserName,
+                Email = model.Email,
+                Password = model.Password,
+                ConfirmPassword = model.ConfirmPassword,
+                BirthdayDate = model.BirthdayDate
+            };
+
+            await _accountRepository.Register(user);
+            return true;
         }
     }
 }

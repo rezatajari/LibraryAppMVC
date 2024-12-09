@@ -30,7 +30,7 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                bool login = _accountService.Login(model);
+                bool login = await _accountService.Login(model);
 
                 if (login)
                 {
@@ -41,6 +41,34 @@ namespace LibraryAppMVC.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpGet]
+        [Route("Account/Register")]
+        public ActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Route("Account/Register")]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                bool chekUser = await _accountService.CheckUserExist(model.Email, model.Password);
+                if (chekUser)
+                {
+                    return View(model);
+                }
+
+                await _accountService.Register(model);
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(model);
+
         }
     }
 }

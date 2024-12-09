@@ -1,6 +1,8 @@
 ﻿using LibraryAppMVC.Data;
 using LibraryAppMVC.Interfaces;
+using LibraryAppMVC.Models;
 using LibraryAppMVC.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryAppMVC.Repositories
 {
@@ -12,11 +14,12 @@ namespace LibraryAppMVC.Repositories
             _libraryDB = libraryDB;
         }
 
-        public bool Login(LoginViewModel model)
+
+        public async Task<bool> Login(LoginViewModel model)
         {
-            var user = _libraryDB.Users
+            var user = await _libraryDB.Users
                 .Where(u => u.Email == model.Email && u.Password == model.Password)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             if (user != null)
             {
@@ -24,7 +27,28 @@ namespace LibraryAppMVC.Repositories
             }
 
             return false;
+        }
 
+        public async Task<bool> CheckUserExist(string email, string password)
+        {
+            var user = await _libraryDB.Users.
+                 Where(u => u.Email == email && u.Password == password)
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            return true;
+
+        }
+
+        public async Task<bool> Register(User newUser)
+        {
+            await _libraryDB.Users.AddAsync(newUser);
+            await _libraryDB.SaveChangesAsync();
+            return true;
         }
     }
 }
