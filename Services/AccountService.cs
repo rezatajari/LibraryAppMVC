@@ -12,7 +12,7 @@ namespace LibraryAppMVC.Services
             _accountRepository = accountRepository;
         }
 
-        public async Task<bool> Login(LoginViewModel model)
+        public async Task<User> Login(LoginViewModel model)
         {
             return await _accountRepository.Login(model);
         }

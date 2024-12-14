@@ -15,7 +15,7 @@ namespace LibraryAppMVC.Repositories
         }
 
 
-        public async Task<bool> Login(LoginViewModel model)
+        public async Task<User> Login(LoginViewModel model)
         {
             var user = await _libraryDB.Users
                 .Where(u => u.Email == model.Email && u.Password == model.Password)
@@ -23,10 +23,10 @@ namespace LibraryAppMVC.Repositories
 
             if (user != null)
             {
-                return true;
+                return user;
             }
 
-            return false;
+            return null;
         }
 
         public async Task<bool> CheckUserExist(string email, string password)

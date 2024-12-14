@@ -1,6 +1,7 @@
 ﻿using LibraryAppMVC.Data;
 using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,30 +16,50 @@ namespace LibraryAppMVC.Repositories
             _libraryDB = libraryDB;
         }
 
-        public void Add(Book book)
+        public async Task Add(Book book)
         {
-            _libraryDB.Books.Add(book);
-            _libraryDB.SaveChanges();
+            await _libraryDB.Books.AddAsync(book);
+            await _libraryDB.SaveChangesAsync();
         }
 
-        public void Remove(Book book)
+        public async Task Remove(Book book)
         {
             _libraryDB.Books.Remove(book);
-            _libraryDB.SaveChanges();
+            await _libraryDB.SaveChangesAsync();
         }
-        public List<Book> GetAll()
+        public async Task<List<Book>> GetAll()
         {
-            return _libraryDB.Books.ToList();
-        }
-
-        public List<Book> SearchByTitle(string title)
-        {
-            return _libraryDB.Books.Where(b => b.Title == title).ToList();
+            return await _libraryDB.Books.ToListAsync();
         }
 
-        public bool ExistValidation(Book book)
+        public async Task<List<Book>> SearchByTitle(string title)
         {
-            return _libraryDB.Books.Any(b => b.Title == book.Title && b.Author == book.Author);
+            return await _libraryDB.Books.Where(b => b.Title == title).ToListAsync();
+        }
+
+        public async Task<bool> ExistValidation(Book book)
+        {
+            return await _libraryDB.Books.AnyAsync(b => b.Title == book.Title && b.Author == book.Author);
+        }
+
+        public async Task<int> GetBookIdByTitle(string title)
+        {
+            return await _libraryDB.Books
+                                   .Where(b => b.Title == title)
+                                   .Select(b => b.Id)
+                                   .FirstOrDefaultAsync();
+        }
+
+        public async Task AddTransaction(Transaction tx)
+        {
+            await _libraryDB.Transactions.AddAsync(tx);
+            await _libraryDB.SaveChangesAsync();
+        }
+
+        public async Task<Book> GetBookByTitle(string title)
+        {
+            return await _libraryDB.Books.FirstOrDefaultAsync(b => b.Title == title);
+
         }
     }
 }

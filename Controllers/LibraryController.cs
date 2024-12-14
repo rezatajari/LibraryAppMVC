@@ -29,53 +29,84 @@ namespace LibraryAppMVC.Controllers
 
         [Route("library/Add")]
         [HttpPost]
-        public IActionResult Add(AddBookViewModel newBook)
+        public async Task<IActionResult> Add(BookViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return View(newBook);
+                var userId = HttpContext.Session.GetInt32("UserId");
+
+                if (userId == null)
+                {
+                    TempData["ErrorMessage"] = "User not logged in!";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                try
+                {
+                    await _bookService.Add(userId.Value, model);
+
+                    TempData["SuccessMessage"] = "Book added successfully!";
+                    return RedirectToAction("Add");
+                }
+                catch (Exception ex)
+                {
+
+                    TempData["ErrorMessage"] = ex.Message;
+                }
             }
 
-            Book book = new Book()
-            {
-                Title = newBook.Title,
-                Author = newBook.Author,
-                Genre = newBook.Genre,
-            };
-
-            _bookService.Add(book);
-
-            TempData["SuccessMessage"] = "Book added successfully!";
-            return RedirectToAction("Add");
+            return View(model);
         }
 
         [Route("library/remove")]
         [HttpPost]
-        public IActionResult Remove(Book book)
+        public async Task<IActionResult> Remove(string title)
         {
             if (!ModelState.IsValid)
             {
-                return View(book);
+                return View();
             }
 
-            _bookService.Remove(book);
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                TempData["ErrorMessage"] = "User not logged in!";
+                return RedirectToAction("Login", "Account");
+            }
 
-            return View();
+            await _bookService.Remove(title);
+
+            TempData["RemoveMessage"] = "Book Removed!";
+            return RedirectToAction("Home");
         }
 
         [Route("library/list")]
         [HttpGet]
-        public IActionResult List()
+        public async Task<IActionResult> List()
         {
-            List<Book> books = _bookService.GetAll();
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                TempData["ErrorMessage"] = "User not logged in!";
+                return RedirectToAction("Login", "Account");
+            };
+
+            var books = await _bookService.GetAll();
             return View(books);
         }
 
         [Route("library/searchbytitle/{title}")]
         [HttpGet]
-        public IActionResult SearchById(string title)
+        public async Task<IActionResult> SearchById(string title)
         {
-            List<Book> books = _bookService.SearchByTitle(title);
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                TempData["ErrorMessage"] = "User not logged in!";
+                return RedirectToAction("Login", "Account");
+            };
+
+            var books = await _bookService.SearchByTitle(title);
 
             return View(books);
         }

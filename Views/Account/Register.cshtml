@@ -1,0 +1,62 @@
+﻿@model LibraryAppMVC.ViewModels.RegisterViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <div class="register-container">
+        <div class="form-container">
+            <h1>Register</h1>
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div style="color: red;">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
+            <form asp-action="Register" method="post">
+                <div>
+                    <label for="UserName">Username:</label>
+                    <input asp-for="UserName" id="UserName" class="form-control" placeholder="Enter your username" required />
+                    <span asp-validation-for="UserName" style="color: red;"></span>
+                </div>
+
+                <div>
+                    <label for="Email">Email:</label>
+                    <input asp-for="Email" id="Email" class="form-control" placeholder="Enter your email" required />
+                    <span asp-validation-for="Email" style="color: red;"></span>
+                </div>
+
+                <div>
+                    <label for="Password">Password:</label>
+                    <input asp-for="Password" id="Password" type="password" class="form-control" placeholder="Enter your password" required />
+                    <span asp-validation-for="Password" style="color: red;"></span>
+                </div>
+
+                <div>
+                    <label for="ConfirmPassword">Confirm Password:</label>
+                    <input asp-for="ConfirmPassword" id="ConfirmPassword" type="password" class="form-control" placeholder="Confirm your password" required />
+                    <span asp-validation-for="ConfirmPassword" style="color: red;"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="BirthdayDate">Birthday Date:</label>
+                    <input asp-for="BirthdayDate" id="BirthdayDate" type="date" class="form-control" />
+                    <span asp-validation-for="BirthdayDate" class="validation-message"></span>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </div>
+            </form>
+
+            <p>Already have an account? <a href="/Account/Login">Login here</a>.</p>
+        </div>
+    </div>
+</body>
+</html>

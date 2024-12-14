@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryAppMVC.Migrations
 {
     [DbContext(typeof(LibraryDB))]
-    [Migration("20241209074800_init")]
+    [Migration("20241214094737_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -64,9 +64,6 @@ namespace LibraryAppMVC.Migrations
 
                     b.Property<DateTime>("TransactionDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");

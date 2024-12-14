@@ -1,13 +1,10 @@
-﻿using Microsoft.AspNetCore.Components;
-using System.ComponentModel.DataAnnotations;
-using System.Transactions;
+﻿using System.ComponentModel.DataAnnotations;
+using static LibraryAppMVC.Models.Book;
 
-namespace LibraryAppMVC.Models
+namespace LibraryAppMVC.ViewModels
 {
-    public class Book
+    public class BookViewModel
     {
-        public int Id { get; set; }
-
         [Required]
         [StringLength(100, ErrorMessage = "Title cannot be longer than 100 characters.")]
         public string Title { get; set; }
@@ -19,15 +16,5 @@ namespace LibraryAppMVC.Models
         [Required]
         [EnumDataType(typeof(GenreType))]
         public GenreType Genre { get; set; }
-
-        public enum GenreType
-        {
-
-            Fantasy = 1,
-            ScienceFiction = 2,
-            Biography = 3
-        }
-
-        public ICollection<Transaction> Transaction { get; set; }
     }
 }

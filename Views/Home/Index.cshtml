@@ -1,5 +1,62 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Personal Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .login-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+            .login-button:hover {
+                background-color: #0056b3;
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Your Personal Library</h1>
+    </header>
+    <div class="container">
+        <p>
+            Your personal library system helps you manage your book collection with ease.
+            You can:
+        </p>
+        <ul>
+            <li>Add and organize your favorite books.</li>
+        </ul>
+        <p>
+            Ready to explore your library? Log in to get started!
+        </p>
+        <a href="/Account/Login" class="login-button">Login</a>
+        <a href="/Account/Register" class="login-button">Register</a>
+    </div>
+</body>
+</html>

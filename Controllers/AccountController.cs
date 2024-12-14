@@ -30,14 +30,17 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                bool login = await _accountService.Login(model);
+                var user = await _accountService.Login(model);
 
-                if (login)
+                if (user != null)
                 {
-                    return RedirectToAction("Library", "Home");
+                    HttpContext.Session.SetInt32("UserId", user.Id);
+                    TempData["SuccessMessage"] = "Login successful!";
+                    return RedirectToAction("Profile");
                 }
 
-                return View();
+                TempData["ErrorMessage"] = "Invalid login credentials. Please try again.";
+                return View(model);
             }
 
             return View(model);
@@ -56,19 +59,27 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                bool chekUser = await _accountService.CheckUserExist(model.Email, model.Password);
-                if (chekUser)
+                bool userExist = await _accountService.CheckUserExist(model.Email, model.Password);
+                if (userExist)
                 {
+                    TempData["ErrorMessage"] = "A user with this email already exists.";
                     return View(model);
                 }
 
                 await _accountService.Register(model);
-
-                return RedirectToAction("Index", "Home");
+                TempData["SuccessMessage"] = "Registration successful! You can now log in.";
+                return RedirectToAction("Login");
             }
 
             return View(model);
 
+        }
+
+        [HttpGet]
+        [Route("Account/Profile")]
+        public IActionResult Profile()
+        {
+            return View();
         }
     }
 }

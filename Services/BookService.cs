@@ -2,6 +2,7 @@
 using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
 using LibraryAppMVC.Validators;
+using LibraryAppMVC.ViewModels;
 
 namespace LibraryAppMVC.Services
 {
@@ -15,29 +16,52 @@ namespace LibraryAppMVC.Services
             _bookRepository = bookRepository;
             _bookValidator = bookValidation;
         }
-        public void Add(Book newBook)
+        public async Task Add(int userId, BookViewModel model)
         {
-            if (_bookValidator.ExistValidation(newBook))
+            var newBook = new Book()
+            {
+                Title = model.Title,
+                Author = model.Author,
+                Genre = model.Genre
+            };
+
+            bool existBook = await _bookValidator.ExistValidation(newBook);
+
+            if (!existBook)
             {
                 throw new ArgumentException("A book with the same title and author already exists.");
             }
 
-            _bookRepository.Add(newBook);
+            await _bookRepository.Add(newBook);
+
+            int bookId = await _bookRepository.GetBookIdByTitle(newBook.Title);
+
+            var tx = new Transaction()
+            {
+                UserId = userId,
+                BookId = bookId,
+                TransactionDate = DateTime.UtcNow
+
+            };
+
+            await _bookRepository.AddTransaction(tx);
+
         }
 
-        public void Remove(Book newBook)
+        public async Task Remove(string bookTitle)
         {
-            _bookRepository.Remove(newBook);
+            var book = await _bookRepository.GetBookByTitle(bookTitle);
+            await _bookRepository.Remove(book);
         }
 
-        public List<Book> GetAll()
+        public async Task<List<Book>> GetAll()
         {
-            return _bookRepository.GetAll();
+            return await _bookRepository.GetAll();
         }
 
-        public List<Book> SearchByTitle(string title)
+        public async Task<List<Book>> SearchByTitle(string title)
         {
-            return _bookRepository.SearchByTitle(title);
+            return await _bookRepository.SearchByTitle(title);
         }
 
     }
