@@ -1,22 +1,11 @@
 ﻿@model LibraryAppMVC.ViewModels.BookViewModel
 
-<!DOCTYPE html>
-<html lang="en">
+@{
+    ViewData["Title"] = "Book Details"; var refererUrl = ViewBag.Referer as string;
+}
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Details</title>
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
         .book-details-container {
             background-color: #fff;
             padding: 20px;
@@ -46,5 +35,9 @@
         <p><label>Author:</label> @Model.Author</p>
         <p><label>Genre:</label> @Model.Genre</p>
     </div>
+    @if (!string.IsNullOrEmpty(refererUrl))
+    {
+        <a href="@refererUrl" class="btn btn-secondary">Back</a>
+    }
+    <a href="@Url.Action("Home")" class="btn btn-primary">Home Library</a>
 </body>
-</html>

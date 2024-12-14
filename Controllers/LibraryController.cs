@@ -3,6 +3,7 @@ using LibraryAppMVC.Models;
 using LibraryAppMVC.Services;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.DiaSymReader;
 
 namespace LibraryAppMVC.Controllers
 {
@@ -43,7 +44,7 @@ namespace LibraryAppMVC.Controllers
 
                 try
                 {
-                    await _bookService.Add(userId.Value, model);
+                    await _bookService.Add(userId, model);
 
                     TempData["SuccessMessage"] = "Book added successfully!";
                     return RedirectToAction("Add");
@@ -73,7 +74,7 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var book = _bookService.SearchByTitle(title).Result;
+            var book = _bookService.SearchByTitle(title, userId).Result;
 
             if (book == null)
             {
@@ -82,7 +83,7 @@ namespace LibraryAppMVC.Controllers
             }
             await _bookService.Remove(book);
             TempData["RemoveMessage"] = "Book Removed!";
-            return RedirectToAction("Home");
+            return RedirectToAction("List");
 
         }
 
@@ -98,16 +99,35 @@ namespace LibraryAppMVC.Controllers
             };
 
             var books = await _bookService.GetAll(userId);
-            var listBookModel = new List<ListBookViewModel>();
 
-            listBookModel = books.Select(b => new ListBookViewModel
+            var createModel = new List<CompositeViewModel>();
+            foreach (var book in books)
             {
-                Title = b.Title,
-                Author = b.Author,
-                Genre = (ListBookViewModel.GenreType)b.Genre
-            }).ToList();
+                var listBookViewModel = new ListBookViewModel
+                {
+                    Title = book.Title,
+                    Author = book.Author,
+                    Genre = (ListBookViewModel.GenreType)book.Genre,
+                    BookDetails = new BookViewModel
+                    {
+                        Title = book.Title,
+                        Author = book.Author,
+                        Genre = book.Genre
+                    }
+                }; ;
 
-            return View(listBookModel);
+
+                var createCompositeViewModel = new CompositeViewModel()
+                {
+                    listBooks = listBookViewModel,
+                    bookDetails = listBookViewModel.BookDetails
+
+                };
+
+                createModel.Add(createCompositeViewModel);
+            };
+
+            return View(createModel);
         }
 
         [HttpGet]
@@ -128,7 +148,7 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Login", "Account");
             };
 
-            var book = await _bookService.SearchByTitle(title);
+            var book = await _bookService.SearchByTitle(title, userId);
             if (book == null)
             {
                 TempData["ErrorMessage"] = "This book is not exist";
@@ -146,10 +166,12 @@ namespace LibraryAppMVC.Controllers
         }
 
 
+        [HttpPost]
         [HttpGet]
         [Route("Library/BookDetails")]
         public IActionResult BookDetails(BookViewModel book)
         {
+            ViewBag.Referer = Request.Headers["Referer"].ToString();
             return View(book);
         }
 

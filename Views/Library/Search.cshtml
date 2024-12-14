@@ -1,19 +1,6 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+﻿<head>
     <title>Book Search</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
 
         .search-container {
             background-color: #fff;
@@ -50,20 +37,21 @@
                 }
     </style>
 
+</head>
+
+<body>
     @if (TempData["ErrorMessage"] != null)
     {
         <div style="color: red;">
             @TempData["ErrorMessage"]
         </div>
     }
-</head>
-<body>
     <div class="search-container">
         <h2>Search Books by Title</h2>
-        <form action="/library/SearchByTitle" method="get">
+        <form action="/library/SearchByTitle" method="post">
             <input type="text" name="title" placeholder="Enter book title">
             <button type="submit">Search</button>
         </form>
     </div>
+    <a href="@Url.Action("Home")" class="btn btn-primary btn-block">Home Library</a>
 </body>
-</html>

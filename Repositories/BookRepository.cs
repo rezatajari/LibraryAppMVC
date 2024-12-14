@@ -29,23 +29,28 @@ namespace LibraryAppMVC.Repositories
         }
         public async Task<List<Book>> GetAll(int? userId)
         {
-            var bookList = _libraryDB.Transactions
+            var bookList = await _libraryDB.Transactions
                                     .Where(u => u.UserId == userId)
                                     .Select(b => b.Book)
-                                    .ToList();
+                                    .ToListAsync();
 
             return bookList;
         }
 
-        public async Task<Book> SearchByTitle(string title)
+        public async Task<Book> SearchByTitle(string title, int? userId)
         {
-            var book = await _libraryDB.Books.FirstOrDefaultAsync(b => b.Title == title);
+            var book = await _libraryDB.Transactions
+                                        .Where(b => b.Book.Title == title && b.UserId == userId)
+                                        .Select(b => b.Book)
+                                        .FirstOrDefaultAsync();
             return book;
         }
 
-        public async Task<bool> ExistValidation(Book book)
+        public async Task<bool> ExistValidation(Book book, int? userId)
         {
-            return await _libraryDB.Books.AnyAsync(b => b.Title == book.Title && b.Author == book.Author);
+            return await _libraryDB.Transactions
+                                   .Where(b => b.Book.Title == book.Title && b.Book.Author == book.Author && b.UserId == userId)
+                                   .AnyAsync();
         }
 
         public async Task<int> GetBookIdByTitle(string title)

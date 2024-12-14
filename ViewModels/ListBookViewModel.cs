@@ -13,7 +13,7 @@ namespace LibraryAppMVC.ViewModels
         [Required]
         [EnumDataType(typeof(GenreType))]
         public GenreType Genre { get; set; }
-
+        public BookViewModel BookDetails { get; set; }
         public enum GenreType
         {
 

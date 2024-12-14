@@ -16,7 +16,7 @@ namespace LibraryAppMVC.Services
             _bookRepository = bookRepository;
             _bookValidator = bookValidation;
         }
-        public async Task Add(int userId, BookViewModel model)
+        public async Task Add(int? userId, BookViewModel model)
         {
             var newBook = new Book()
             {
@@ -25,7 +25,7 @@ namespace LibraryAppMVC.Services
                 Genre = model.Genre
             };
 
-            bool existBook = await _bookValidator.ExistValidation(newBook);
+            bool existBook = await _bookValidator.ExistValidation(newBook,userId);
 
             if (existBook)
             {
@@ -59,9 +59,9 @@ namespace LibraryAppMVC.Services
             return books;
         }
 
-        public async Task<Book> SearchByTitle(string title)
+        public async Task<Book> SearchByTitle(string title,int? userId)
         {
-            return await _bookRepository.SearchByTitle(title);
+            return await _bookRepository.SearchByTitle(title,userId);
         }
 
     }
