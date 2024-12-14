@@ -1,0 +1,77 @@
+﻿@model IEnumerable<LibraryAppMVC.ViewModels.ListBookViewModel>
+
+@{
+    ViewData["Title"] = "Book List";
+}
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f4f4f4;
+        text-align: left;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .error {
+        color: red;
+        margin-bottom: 20px;
+    }
+</style>
+
+<h2>Book List</h2>
+
+<!-- Error Message Display -->
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="color: red; margin-bottom: 20px;">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<!-- Table for Listing Books -->
+<table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+        <tr>
+            <th style="border-bottom: 2px solid #ddd; padding: 8px;">Title</th>
+            <th style="border-bottom: 2px solid #ddd; padding: 8px;">Author</th>
+            <th style="border-bottom: 2px solid #ddd; padding: 8px;">Genre</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var book in Model)
+            {
+                <tr>
+                    <td style="border-bottom: 1px solid #ddd; padding: 8px;">@book.Title</td>
+                    <td style="border-bottom: 1px solid #ddd; padding: 8px;">@book.Author</td>
+                    <td style="border-bottom: 1px solid #ddd; padding: 8px;">@book.Genre</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" style="padding: 8px; text-align: center;">No books found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Home")" class="btn btn-primary btn-block">Home Library</a>

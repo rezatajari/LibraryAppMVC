@@ -29,10 +29,10 @@ namespace LibraryAppMVC.Repositories
             return null;
         }
 
-        public async Task<bool> CheckUserExist(string email, string password)
+        public async Task<bool> CheckUserExist(string email)
         {
             var user = await _libraryDB.Users.
-                 Where(u => u.Email == email && u.Password == password)
+                 Where(u => u.Email == email)
                 .FirstOrDefaultAsync();
 
             if (user == null)

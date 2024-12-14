@@ -4,6 +4,7 @@ using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Abstractions;
 using NuGet.Packaging.Signing;
 
 namespace LibraryAppMVC.Controllers
@@ -36,7 +37,13 @@ namespace LibraryAppMVC.Controllers
                 {
                     HttpContext.Session.SetInt32("UserId", user.Id);
                     TempData["SuccessMessage"] = "Login successful!";
-                    return RedirectToAction("Profile");
+
+                    var profile = new ProfileViewModel()
+                    {
+                        Email = user.Email,
+                        UserName = user.UserName
+                    };
+                    return RedirectToAction("Profile", profile);
                 }
 
                 TempData["ErrorMessage"] = "Invalid login credentials. Please try again.";
@@ -59,7 +66,7 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                bool userExist = await _accountService.CheckUserExist(model.Email, model.Password);
+                bool userExist = await _accountService.CheckUserExist(model.Email);
                 if (userExist)
                 {
                     TempData["ErrorMessage"] = "A user with this email already exists.";
@@ -77,9 +84,9 @@ namespace LibraryAppMVC.Controllers
 
         [HttpGet]
         [Route("Account/Profile")]
-        public IActionResult Profile()
+        public IActionResult Profile(ProfileViewModel model)
         {
-            return View();
+            return View(model);
         }
     }
 }

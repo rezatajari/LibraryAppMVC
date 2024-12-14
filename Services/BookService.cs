@@ -27,7 +27,7 @@ namespace LibraryAppMVC.Services
 
             bool existBook = await _bookValidator.ExistValidation(newBook);
 
-            if (!existBook)
+            if (existBook)
             {
                 throw new ArgumentException("A book with the same title and author already exists.");
             }
@@ -48,18 +48,18 @@ namespace LibraryAppMVC.Services
 
         }
 
-        public async Task Remove(string bookTitle)
+        public async Task Remove(Book book)
         {
-            var book = await _bookRepository.GetBookByTitle(bookTitle);
             await _bookRepository.Remove(book);
         }
 
-        public async Task<List<Book>> GetAll()
+        public async Task<List<Book>> GetAll(int? userId)
         {
-            return await _bookRepository.GetAll();
+            var books = await _bookRepository.GetAll(userId);
+            return books;
         }
 
-        public async Task<List<Book>> SearchByTitle(string title)
+        public async Task<Book> SearchByTitle(string title)
         {
             return await _bookRepository.SearchByTitle(title);
         }

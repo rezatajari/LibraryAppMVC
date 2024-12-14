@@ -50,7 +50,6 @@ namespace LibraryAppMVC.Controllers
                 }
                 catch (Exception ex)
                 {
-
                     TempData["ErrorMessage"] = ex.Message;
                 }
             }
@@ -74,10 +73,17 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            await _bookService.Remove(title);
+            var book = _bookService.SearchByTitle(title).Result;
 
+            if (book == null)
+            {
+                TempData["ErrorMessage"] = "This book is not exist";
+                return RedirectToAction("List");
+            }
+            await _bookService.Remove(book);
             TempData["RemoveMessage"] = "Book Removed!";
             return RedirectToAction("Home");
+
         }
 
         [Route("library/list")]
@@ -91,13 +97,29 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Login", "Account");
             };
 
-            var books = await _bookService.GetAll();
-            return View(books);
+            var books = await _bookService.GetAll(userId);
+            var listBookModel = new List<ListBookViewModel>();
+
+            listBookModel = books.Select(b => new ListBookViewModel
+            {
+                Title = b.Title,
+                Author = b.Author,
+                Genre = (ListBookViewModel.GenreType)b.Genre
+            }).ToList();
+
+            return View(listBookModel);
         }
 
-        [Route("library/searchbytitle/{title}")]
         [HttpGet]
-        public async Task<IActionResult> SearchById(string title)
+        [Route("Library/Search")]
+        public IActionResult Search()
+        {
+            return View();
+        }
+
+        [Route("library/SearchByTitle")]
+        [HttpPost]
+        public async Task<IActionResult> SearchByTitle(string title)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null)
@@ -106,9 +128,30 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Login", "Account");
             };
 
-            var books = await _bookService.SearchByTitle(title);
+            var book = await _bookService.SearchByTitle(title);
+            if (book == null)
+            {
+                TempData["ErrorMessage"] = "This book is not exist";
+                return RedirectToAction("Search");
+            }
 
-            return View(books);
+            var bookModel = new BookViewModel()
+            {
+                Title = book.Title,
+                Author = book.Author,
+                Genre = book.Genre
+            };
+
+            return RedirectToAction("BookDetails", bookModel);
         }
+
+
+        [HttpGet]
+        [Route("Library/BookDetails")]
+        public IActionResult BookDetails(BookViewModel book)
+        {
+            return View(book);
+        }
+
     }
 }

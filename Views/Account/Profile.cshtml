@@ -1,0 +1,78 @@
+﻿@model LibraryAppMVC.ViewModels.ProfileViewModel
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    .profile-details {
+        margin: 20px 0;
+        padding: 10px;
+        background-color: #f7f7f7;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+        .profile-details p {
+            margin: 8px 0;
+        }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+    }
+</style>
+
+@{
+    ViewData["Title"] = "Profile";
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="color: green;">
+        @TempData["SuccessMessage"]
+    </div>
+}
+<h2>Your Profile</h2>
+
+<div class="profile-details">
+    <p><strong>Name:</strong>@Model.UserName</p>
+    <p><strong>Email:</strong>@Model.Email</p>
+</div>
+
+<div class="button-container">
+    <!-- Button to go to the library -->
+    <a href="@Url.Action("Home","library")">
+        <button class="btn btn-primary">Go to Library</button>
+    </a>
+
+    <!-- Button to go to the home page -->
+    <a href="@Url.Action("Index", "Home")">
+        <button class="btn btn-secondary">Go to Home</button>
+    </a>
+</div>

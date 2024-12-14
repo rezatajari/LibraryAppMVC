@@ -16,9 +16,9 @@ namespace LibraryAppMVC.Services
         {
             return await _accountRepository.Login(model);
         }
-        public async Task<bool> CheckUserExist(string email, string password)
+        public async Task<bool> CheckUserExist(string email)
         {
-            return await _accountRepository.CheckUserExist(email, password);
+            return await _accountRepository.CheckUserExist(email);
         }
 
         public async Task<bool> Register(RegisterViewModel model)

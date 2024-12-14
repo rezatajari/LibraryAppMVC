@@ -8,8 +8,16 @@
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success">
+    <div style="color: green;">
         @TempData["SuccessMessage"]
+    </div>
+}
+
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="color: red;">
+        @TempData["ErrorMessage"]
     </div>
 }
 

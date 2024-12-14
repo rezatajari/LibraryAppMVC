@@ -7,6 +7,6 @@ namespace LibraryAppMVC.Interfaces
     {
         Task<User> Login(LoginViewModel model);
         Task<bool> Register(User newUser);
-        Task<bool> CheckUserExist(string email, string password);
+        Task<bool> CheckUserExist(string email);
     }
 }

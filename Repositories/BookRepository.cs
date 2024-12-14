@@ -27,14 +27,20 @@ namespace LibraryAppMVC.Repositories
             _libraryDB.Books.Remove(book);
             await _libraryDB.SaveChangesAsync();
         }
-        public async Task<List<Book>> GetAll()
+        public async Task<List<Book>> GetAll(int? userId)
         {
-            return await _libraryDB.Books.ToListAsync();
+            var bookList = _libraryDB.Transactions
+                                    .Where(u => u.UserId == userId)
+                                    .Select(b => b.Book)
+                                    .ToList();
+
+            return bookList;
         }
 
-        public async Task<List<Book>> SearchByTitle(string title)
+        public async Task<Book> SearchByTitle(string title)
         {
-            return await _libraryDB.Books.Where(b => b.Title == title).ToListAsync();
+            var book = await _libraryDB.Books.FirstOrDefaultAsync(b => b.Title == title);
+            return book;
         }
 
         public async Task<bool> ExistValidation(Book book)
@@ -54,12 +60,6 @@ namespace LibraryAppMVC.Repositories
         {
             await _libraryDB.Transactions.AddAsync(tx);
             await _libraryDB.SaveChangesAsync();
-        }
-
-        public async Task<Book> GetBookByTitle(string title)
-        {
-            return await _libraryDB.Books.FirstOrDefaultAsync(b => b.Title == title);
-
         }
     }
 }
