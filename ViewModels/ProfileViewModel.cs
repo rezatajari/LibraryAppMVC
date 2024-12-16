@@ -12,5 +12,9 @@ namespace LibraryAppMVC.ViewModels
         [Required]
         [DisplayName("Username")]
         public string UserName { get; set; }
+
+        public IFormFile? ProfilePicture { get; set; }
+
+        public string? ExistProfilePicture { get; set; }
     }
 }

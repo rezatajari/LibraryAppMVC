@@ -35,5 +35,50 @@ namespace LibraryAppMVC.Services
             await _accountRepository.Register(user);
             return true;
         }
+
+        public async Task<User> GetUserById(int? id)
+        {
+            return await _accountRepository.GetUserById(id);
+        }
+
+        public async Task EditProfileUser(int? userId, ProfileViewModel model)
+        {
+            var user = await _accountRepository.GetUserById(userId);
+            user.Email = model.Email;
+            user.UserName = model.UserName;
+
+            if (model.ProfilePicture != null)
+            {
+                // Define the folder to save the file
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                Directory.CreateDirectory(uploadsFolder);
+
+                // Generate a unique file name
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProfilePicture.FileName);
+
+                // Save the file to the folder
+                var filePath = Path.Combine(uploadsFolder, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ProfilePicture.CopyToAsync(stream);
+                }
+
+                user.ProfilePicturePath = "/uploads/" + fileName;
+            }
+
+            await _accountRepository.UpdateUser(user);
+        }
+
+        public async Task<bool> EmailEditExist(int? userId, string email)
+        {
+            var emailExists = await _accountRepository.EmailExists(userId, email);
+
+            if (emailExists)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

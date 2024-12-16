@@ -50,5 +50,21 @@ namespace LibraryAppMVC.Repositories
             await _libraryDB.SaveChangesAsync();
             return true;
         }
+
+        public async Task<User> GetUserById(int? id)
+        {
+            return await _libraryDB.Users.FindAsync(id);
+        }
+
+        public async Task UpdateUser(User user)
+        {
+            _libraryDB.Users.Update(user);
+            await _libraryDB.SaveChangesAsync();
+        }
+
+        public async Task<bool> EmailExists(int? userId, string email)
+        {
+            return await _libraryDB.Users.AnyAsync(u => u.Id != userId && u.Email == email);
+        }
     }
 }

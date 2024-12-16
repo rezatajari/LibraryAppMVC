@@ -1,11 +1,6 @@
 ﻿using LibraryAppMVC.Interfaces;
-using LibraryAppMVC.Services;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.Identity.Client;
-using Microsoft.IdentityModel.Abstractions;
-using NuGet.Packaging.Signing;
 
 namespace LibraryAppMVC.Controllers
 {
@@ -38,12 +33,7 @@ namespace LibraryAppMVC.Controllers
                     HttpContext.Session.SetInt32("UserId", user.Id);
                     TempData["SuccessMessage"] = "Login successful!";
 
-                    var profile = new ProfileViewModel()
-                    {
-                        Email = user.Email,
-                        UserName = user.UserName
-                    };
-                    return RedirectToAction("Profile", profile);
+                    return RedirectToAction("Profile");
                 }
 
                 TempData["ErrorMessage"] = "Invalid login credentials. Please try again.";
@@ -84,8 +74,63 @@ namespace LibraryAppMVC.Controllers
 
         [HttpGet]
         [Route("Account/Profile")]
-        public IActionResult Profile(ProfileViewModel model)
+        public IActionResult Profile()
         {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            var user = _accountService.GetUserById(userId).Result;
+
+            var profileModel = new ProfileViewModel
+            {
+                Email = user.Email,
+                UserName = user.UserName,
+                ExistProfilePicture = user.ProfilePicturePath
+            };
+
+            return View(profileModel);
+        }
+
+        [HttpGet]
+        [Route("Account/EditProfile")]
+        public async Task<IActionResult> EditProfile()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            var user = await _accountService.GetUserById(userId);
+
+            var profileModel = new ProfileViewModel
+            {
+                Email = user.Email,
+                UserName = user.UserName,
+                ExistProfilePicture = user.ProfilePicturePath
+            };
+
+            return View(profileModel);
+        }
+
+
+        [HttpPost]
+        [Route("Account/EditProfile")]
+        public async Task<IActionResult> EditProfile(ProfileViewModel model)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (ModelState.IsValid)
+            {
+                var emailExists = await _accountService.EmailEditExist(userId, model.Email);
+
+                if (emailExists)
+                {
+                    ModelState.AddModelError("Email", "This email address is already in use.");
+                    return View(model);
+                }
+
+                await _accountService.EditProfileUser(userId, model);
+
+                TempData["SuccessMessage"] = "Profile updated successfully!";
+                return RedirectToAction("EditProfile");
+            }
+
             return View(model);
         }
     }

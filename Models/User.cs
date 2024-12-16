@@ -22,6 +22,10 @@ namespace LibraryAppMVC.Models
         [Compare("Password", ErrorMessage = "The Confirm Password is not math")]
         public string ConfirmPassword { get; set; }
 
+        [StringLength(255)]
+        [Url]
+        public string? ProfilePicturePath { get; set; }
+
         [Required]
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
         public string Email { get; set; }

@@ -8,5 +8,8 @@ namespace LibraryAppMVC.Interfaces
         Task<User> Login(LoginViewModel model);
         Task<bool> Register(User newUser);
         Task<bool> CheckUserExist(string email);
+        Task<User> GetUserById(int? id);
+        Task UpdateUser(User user);
+        Task<bool> EmailExists(int? userId, string email);
     }
 }

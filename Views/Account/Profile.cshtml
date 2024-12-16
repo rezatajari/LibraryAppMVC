@@ -4,15 +4,58 @@
         font-family: Arial, sans-serif;
     }
 
-    .profile-details {
-        margin: 20px 0;
-        padding: 10px;
+    .profile-container {
+        display: flex;
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
         background-color: #f7f7f7;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
+    }
+
+    /* Left Menu */
+    .menu {
+        flex: 1;
+        padding: 10px;
+        border-right: 1px solid #ddd;
+    }
+
+        .menu a {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            color: white;
+            background-color: #007bff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+            .menu a:hover {
+                opacity: 0.8;
+            }
+
+    /* Profile Info Section */
+    .profile-content {
+        flex: 3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
+    }
+
+    .profile-picture {
+        flex: 1;
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .profile-details {
+        flex: 2;
+        margin-left: 20px;
     }
 
         .profile-details p {
@@ -21,7 +64,6 @@
 
     .button-container {
         display: flex;
-        justify-content: center;
         gap: 15px;
         margin-top: 20px;
     }
@@ -32,6 +74,11 @@
         border-radius: 5px;
         font-size: 16px;
         cursor: pointer;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
     }
 
     .btn-primary {
@@ -58,21 +105,30 @@
         @TempData["SuccessMessage"]
     </div>
 }
-<h2>Your Profile</h2>
+<div class="profile-container">
+    <!-- Left Menu -->
+    <div class="menu">
+        <a href="@Url.Action("Home", "Library")">Library</a>
+        <a href="@Url.Action("Index", "Home")">Log Out</a>
+        <a href="@Url.Action("DeleteAccount", "Account")" class="btn-danger">Delete Account</a>
+        <a href="@Url.Action("EditProfile", "Account")">Edit Profile</a>
+    </div>
 
-<div class="profile-details">
-    <p><strong>Name:</strong>@Model.UserName</p>
-    <p><strong>Email:</strong>@Model.Email</p>
-</div>
+    <!-- Profile Content -->
+    <div class="profile-content">
+        <!-- Profile Picture -->
+        @if (Model.ExistProfilePicture != null)
+        {
+            <div class="form-group">
+                <img src="@Model.ExistProfilePicture" alt="Profile Picture" width="150" height="150" />
+            </div>
+        }
 
-<div class="button-container">
-    <!-- Button to go to the library -->
-    <a href="@Url.Action("Home","library")">
-        <button class="btn btn-primary">Go to Library</button>
-    </a>
-
-    <!-- Button to go to the home page -->
-    <a href="@Url.Action("Index", "Home")">
-        <button class="btn btn-secondary">Go to Home</button>
-    </a>
+        <!-- Profile Details -->
+        <div class="profile-details">
+            <p><strong>Username:</strong> @Model.UserName</p>
+            <p><strong>Email:</strong> @Model.Email</p>
+        </div>
+       
+    </div>
 </div>
