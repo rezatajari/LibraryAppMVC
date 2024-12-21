@@ -11,5 +11,6 @@ namespace LibraryAppMVC.Interfaces
         Task<User> GetUserById(int? id);
         Task UpdateUser(User user);
         Task<bool> EmailExists(int? userId, string email);
+        Task<bool> RemoveUser(User user);
     }
 }

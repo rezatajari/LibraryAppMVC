@@ -16,7 +16,6 @@ namespace LibraryAppMVC.ViewModels
         public BookViewModel BookDetails { get; set; }
         public enum GenreType
         {
-
             Fantasy = 1,
             ScienceFiction = 2,
             Biography = 3

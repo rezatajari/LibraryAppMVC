@@ -66,5 +66,12 @@ namespace LibraryAppMVC.Repositories
         {
             return await _libraryDB.Users.AnyAsync(u => u.Id != userId && u.Email == email);
         }
+
+        public async Task<bool> RemoveUser(User user)
+        {
+            _libraryDB.Users.Remove(user);
+            await _libraryDB.SaveChangesAsync();
+            return true;
+        }
     }
 }

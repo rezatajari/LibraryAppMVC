@@ -27,6 +27,7 @@ namespace LibraryAppMVC.Repositories
             _libraryDB.Books.Remove(book);
             await _libraryDB.SaveChangesAsync();
         }
+
         public async Task<List<Book>> GetAll(int? userId)
         {
             var bookList = await _libraryDB.Transactions

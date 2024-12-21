@@ -41,6 +41,12 @@
     </style>
 </head>
 <body>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="color: red;">
+            @TempData["SuccessMessage"]
+        </div>
+    }
     <header>
         <h1>Welcome to Your Personal Library</h1>
     </header>

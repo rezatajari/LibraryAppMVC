@@ -1,9 +1,6 @@
 ﻿using LibraryAppMVC.Interfaces;
-using LibraryAppMVC.Models;
-using LibraryAppMVC.Services;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.DiaSymReader;
 
 namespace LibraryAppMVC.Controllers
 {
@@ -74,7 +71,7 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var book = _bookService.SearchByTitle(title, userId).Result;
+            var book =await _bookService.SearchByTitle(title, userId);
 
             if (book == null)
             {
@@ -114,14 +111,12 @@ namespace LibraryAppMVC.Controllers
                         Author = book.Author,
                         Genre = book.Genre
                     }
-                }; ;
-
+                };
 
                 var createCompositeViewModel = new CompositeViewModel()
                 {
                     listBooks = listBookViewModel,
                     bookDetails = listBookViewModel.BookDetails
-
                 };
 
                 createModel.Add(createCompositeViewModel);
@@ -164,7 +159,6 @@ namespace LibraryAppMVC.Controllers
 
             return RedirectToAction("BookDetails", bookModel);
         }
-
 
         [HttpPost]
         [HttpGet]

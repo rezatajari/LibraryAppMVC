@@ -11,5 +11,6 @@ namespace LibraryAppMVC.Interfaces
         Task<User> GetUserById(int? id);
         Task EditProfileUser(int? userId, ProfileViewModel model);
         Task<bool> EmailEditExist(int? userId, string email);
+        Task<bool> RemoveUser(int? userId);
     }
 }

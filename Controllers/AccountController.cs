@@ -74,11 +74,11 @@ namespace LibraryAppMVC.Controllers
 
         [HttpGet]
         [Route("Account/Profile")]
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
 
-            var user = _accountService.GetUserById(userId).Result;
+            var user =await _accountService.GetUserById(userId);
 
             var profileModel = new ProfileViewModel
             {
@@ -128,10 +128,31 @@ namespace LibraryAppMVC.Controllers
                 await _accountService.EditProfileUser(userId, model);
 
                 TempData["SuccessMessage"] = "Profile updated successfully!";
-                return RedirectToAction("EditProfile");
+                return RedirectToAction("Profile");
             }
 
             return View(model);
         }
+
+
+        [HttpGet]
+        [Route("Account/DeleteAccount")]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            var result = await _accountService.RemoveUser(userId);
+
+            if (result)
+            {
+
+                TempData["SuccessMessage"] = "Profile Deleted";
+                return RedirectToAction("Index", "Home");
+            }
+
+            TempData["ErrorMessage"] = "Somethings wronge!!";
+            return RedirectToAction("Profile");
+        }
+
     }
 }

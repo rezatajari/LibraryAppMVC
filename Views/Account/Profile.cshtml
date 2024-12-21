@@ -105,6 +105,14 @@
         @TempData["SuccessMessage"]
     </div>
 }
+
+@if (TempData["ErrorMessage"] != null){
+
+    <div style="color: red;">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
 <div class="profile-container">
     <!-- Left Menu -->
     <div class="menu">

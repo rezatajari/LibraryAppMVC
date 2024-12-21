@@ -80,5 +80,12 @@ namespace LibraryAppMVC.Services
 
             return false;
         }
+
+        public async Task<bool> RemoveUser(int? userId)
+        {
+
+            var user = await _accountRepository.GetUserById(userId);
+            return await _accountRepository.RemoveUser(user);
+        }
     }
 }
