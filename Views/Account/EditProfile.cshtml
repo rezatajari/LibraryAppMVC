@@ -1,0 +1,36 @@
+﻿@model LibraryAppMVC.ViewModels.ProfileViewModel
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="color:green">
+        @TempData["SuccessMessage"]
+    </div>
+}
+<form asp-action="EditProfile" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="UserName" class="control-label"></label>
+        <input asp-for="UserName" class="form-control" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Email" class="control-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="ProfilePicture" class="control-label"></label>
+        <input asp-for="ProfilePicture" type="file" class="form-control" />
+        <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+    </div>
+    @if (Model.ExistProfilePicture != null)
+    {
+        <div class="form-group">
+            <img src="@Model.ExistProfilePicture" alt="Profile Picture" width="150" height="150" />
+        </div>
+    }
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+<div class="col-md-3">
+    <a href="@Url.Action("Profile", "Account")" class="btn btn-info btn-block">Profile</a>
+</div>

@@ -1,0 +1,50 @@
+﻿@model LibraryAppMVC.ViewModels.BookViewModel
+
+@{
+    ViewData["Title"] = "Add Book";
+}
+
+<h2>Add Book</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="color: green;">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="color: red;">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+
+<form asp-action="Add">
+    <div class="form-group">
+        <label asp-for="Title" class="control-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Author" class="control-label"></label>
+        <input asp-for="Author" class="form-control" />
+        <span asp-validation-for="Author" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Genre" class="control-label"></label>
+        <select asp-for="Genre" class="form-control" asp-items="Html.GetEnumSelectList<LibraryAppMVC.Models.Book.GenreType>()"></select>
+        <span asp-validation-for="Genre" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Add" class="btn btn-primary" />
+    </div>
+</form>
+<a href="@Url.Action("Home")" class="btn btn-primary btn-block">Home Library</a>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

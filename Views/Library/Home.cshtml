@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Library Management Home";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <a href="@Url.Action("Add", "Library")" class="btn btn-primary btn-block">Add Book</a>
+        </div>
+        <div class="col-md-3">
+            <a href="@Url.Action("Search", "Library")" class="btn btn-info btn-block">Search Book</a>
+        </div>
+        <div class="col-md-3">
+            <a href="@Url.Action("List", "Library")" class="btn btn-success btn-block">List Books</a>
+        </div>
+        <div class="col-md-3">
+            <a href="@Url.Action("Profile", "Account")" class="btn btn-info btn-block">Profile</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        margin-top: 50px;
+    }
+    .btn-block {
+        margin-bottom: 20px;
+    }
+</style>

@@ -1,0 +1,142 @@
+﻿@model LibraryAppMVC.ViewModels.ProfileViewModel
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    .profile-container {
+        display: flex;
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #f7f7f7;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Left Menu */
+    .menu {
+        flex: 1;
+        padding: 10px;
+        border-right: 1px solid #ddd;
+    }
+
+        .menu a {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            color: white;
+            background-color: #007bff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+            .menu a:hover {
+                opacity: 0.8;
+            }
+
+    /* Profile Info Section */
+    .profile-content {
+        flex: 3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
+    }
+
+    .profile-picture {
+        flex: 1;
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .profile-details {
+        flex: 2;
+        margin-left: 20px;
+    }
+
+        .profile-details p {
+            margin: 8px 0;
+        }
+
+    .button-container {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+    }
+</style>
+
+@{
+    ViewData["Title"] = "Profile";
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="color: green;">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null){
+
+    <div style="color: red;">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="profile-container">
+    <!-- Left Menu -->
+    <div class="menu">
+        <a href="@Url.Action("Home", "Library")">Library</a>
+        <a href="@Url.Action("Index", "Home")">Log Out</a>
+        <a href="@Url.Action("DeleteAccount", "Account")" class="btn-danger">Delete Account</a>
+        <a href="@Url.Action("EditProfile", "Account")">Edit Profile</a>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="profile-content">
+        <!-- Profile Picture -->
+        @if (Model.ExistProfilePicture != null)
+        {
+            <div class="form-group">
+                <img src="@Model.ExistProfilePicture" alt="Profile Picture" width="150" height="150" />
+            </div>
+        }
+
+        <!-- Profile Details -->
+        <div class="profile-details">
+            <p><strong>Username:</strong> @Model.UserName</p>
+            <p><strong>Email:</strong> @Model.Email</p>
+        </div>
+       
+    </div>
+</div>
