@@ -4,11 +4,26 @@ using LibraryAppMVC.Repositories;
 using LibraryAppMVC.Services;
 using LibraryAppMVC.Validators;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<LibraryDB>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDB")));
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration().MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+ .MinimumLevel.Override("System", LogEventLevel.Warning) 
+ .MinimumLevel.Information() 
+ .WriteTo.Console() 
+ .WriteTo.MSSqlServer(
+    connectionString: builder.Configuration.GetConnectionString("LibraryDB"),
+    sinkOptions: new MSSqlServerSinkOptions { TableName = "Logs", AutoCreateSqlTable = true })
+   .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddTransient<IBookService, BookService>();
 builder.Services.AddTransient<IBookRepository, BookRepository>();
@@ -28,11 +43,11 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
+
 app.UseStaticFiles();
 
 app.UseSession();

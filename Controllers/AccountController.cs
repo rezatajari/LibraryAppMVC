@@ -154,5 +154,12 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction("Profile");
         }
 
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Index","Home");
+        }
+
     }
 }

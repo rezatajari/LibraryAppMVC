@@ -7,13 +7,16 @@ namespace LibraryAppMVC.Services
     public class AccountService : IAccountService
     {
         private readonly IAccountRepository _accountRepository;
-        public AccountService(IAccountRepository accountRepository)
+        private readonly ILogger<BookService> _logger;
+        public AccountService(IAccountRepository accountRepository, ILogger<BookService> logger)
         {
             _accountRepository = accountRepository;
+            _logger = logger;
         }
 
         public async Task<User> Login(LoginViewModel model)
         {
+            _logger.LogInformation("Login servies is run");
             return await _accountRepository.Login(model);
         }
         public async Task<bool> CheckUserExist(string email)
