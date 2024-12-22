@@ -39,17 +39,10 @@ namespace LibraryAppMVC.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                try
-                {
-                    await _bookService.Add(userId, model);
+                await _bookService.Add(userId, model);
 
-                    TempData["SuccessMessage"] = "Book added successfully!";
-                    return RedirectToAction("Add");
-                }
-                catch (Exception ex)
-                {
-                    TempData["ErrorMessage"] = ex.Message;
-                }
+                TempData["SuccessMessage"] = "Book added successfully!";
+                return RedirectToAction("Add");
             }
 
             return View(model);
@@ -71,7 +64,7 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var book =await _bookService.SearchByTitle(title, userId);
+            var book = await _bookService.SearchByTitle(title, userId);
 
             if (book == null)
             {

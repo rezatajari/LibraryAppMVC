@@ -3,10 +3,12 @@ using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Repositories;
 using LibraryAppMVC.Services;
 using LibraryAppMVC.Validators;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
+using System.ComponentModel;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,5 +63,3 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}");
 
 app.Run();
-
-

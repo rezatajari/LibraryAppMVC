@@ -8,9 +8,11 @@ namespace LibraryAppMVC.Controllers
     {
 
         private readonly IAccountService _accountService;
-        public AccountController(IAccountService accountService)
+        private readonly ILogger<AccountController> _logger;
+        public AccountController(IAccountService accountService, ILogger<AccountController> logger)
         {
             _accountService = accountService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -26,6 +28,7 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Valid email & password user: {email}", model.Email);
                 var user = await _accountService.Login(model);
 
                 if (user != null)
@@ -78,7 +81,7 @@ namespace LibraryAppMVC.Controllers
         {
             var userId = HttpContext.Session.GetInt32("UserId");
 
-            var user =await _accountService.GetUserById(userId);
+            var user = await _accountService.GetUserById(userId);
 
             var profileModel = new ProfileViewModel
             {
@@ -158,7 +161,7 @@ namespace LibraryAppMVC.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Index","Home");
+            return RedirectToAction("Index", "Home");
         }
 
     }
