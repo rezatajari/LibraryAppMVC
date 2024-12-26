@@ -1,10 +1,12 @@
 ﻿using LibraryAppMVC.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 
 namespace LibraryAppMVC.Data
 {
-    public class LibraryDB : DbContext
+    public class LibraryDB : IdentityDbContext<IdentityUser>
     {
         public LibraryDB(DbContextOptions<LibraryDB> options)
         : base(options) { }

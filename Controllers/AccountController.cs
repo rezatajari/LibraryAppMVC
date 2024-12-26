@@ -1,5 +1,7 @@
 ﻿using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.ViewModels;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAppMVC.Controllers
@@ -9,11 +11,20 @@ namespace LibraryAppMVC.Controllers
 
         private readonly IAccountService _accountService;
         private readonly ILogger<AccountController> _logger;
-        public AccountController(IAccountService accountService, ILogger<AccountController> logger)
+        private readonly IEmailSender _emailSender;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
+        public AccountController(IAccountService accountService, ILogger<AccountController> logger,
+                                 SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager,
+                                 IEmailSender emailSender)
         {
             _accountService = accountService;
             _logger = logger;
+            _signInManager = signInManager;
+            _userManager = userManager;
+            _emailSender = emailSender;
         }
+
 
         [HttpGet]
         [Route("Account/Login")]
@@ -66,13 +77,71 @@ namespace LibraryAppMVC.Controllers
                     return View(model);
                 }
 
-                await _accountService.Register(model);
-                TempData["SuccessMessage"] = "Registration successful! You can now log in.";
-                return RedirectToAction("Login");
+                var user = new IdentityUser { UserName = model.UserName, Email = model.Email };
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    // Generate an email confirmation token
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                    // Create the confirmation link
+                    var confirmationLink = Url.Action("ConfirmEmail", "Account",
+                        new { userId = user.Id, token = token }, protocol: HttpContext.Request.Scheme);
+
+                    //TODO:Alternative: Use Fake SMTP for Testing
+                    // Send confirmation email
+                    await _emailSender.SendEmailAsync(model.Email, "Confirm your email",
+                        $"Please confirm your email by clicking the following link: <a href='{confirmationLink}'>Confirm Email</a>");
+
+                    // Custom notice page
+                    return RedirectToAction("RegistrationConfirmationNotice");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
 
             return View(model);
 
+        }
+
+        [HttpGet]
+        [Route("Account/RegistrationConfirmationNotice")]
+        public IActionResult RegistrationConfirmationNotice()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                return RedirectToAction("Error");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return RedirectToAction("Error");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("ConfirmEmailSuccess");
+            }
+
+            return RedirectToAction("Error");
+        }
+
+        [HttpGet]
+        public IActionResult ConfirmEmailSuccess()
+        {
+            return View();
         }
 
         [HttpGet]
@@ -163,6 +232,5 @@ namespace LibraryAppMVC.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
-
     }
 }

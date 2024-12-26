@@ -3,23 +3,38 @@ using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Repositories;
 using LibraryAppMVC.Services;
 using LibraryAppMVC.Validators;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
-using System.ComponentModel;
+using YourProject.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<LibraryDB>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDB")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDB")));
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.SignIn.RequireConfirmedEmail = true; // Enable email confirmation
+    options.Password.RequiredLength = 4; // Set password policies as needed
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
+.AddEntityFrameworkStores<LibraryDB>()
+.AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration().MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
- .MinimumLevel.Override("System", LogEventLevel.Warning) 
- .MinimumLevel.Information() 
- .WriteTo.Console() 
+ .MinimumLevel.Override("System", LogEventLevel.Warning)
+ .MinimumLevel.Information()
+ .WriteTo.Console()
  .WriteTo.MSSqlServer(
     connectionString: builder.Configuration.GetConnectionString("LibraryDB"),
     sinkOptions: new MSSqlServerSinkOptions { TableName = "Logs", AutoCreateSqlTable = true })
@@ -56,6 +71,7 @@ app.UseSession();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
