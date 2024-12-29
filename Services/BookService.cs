@@ -16,7 +16,7 @@ namespace LibraryAppMVC.Services
             _bookRepository = bookRepository;
             _bookValidator = bookValidation;
         }
-        public async Task Add(int? userId, BookViewModel model)
+        public async Task Add(string userId, BookViewModel model)
         {
             var newBook = new Book()
             {
@@ -53,13 +53,13 @@ namespace LibraryAppMVC.Services
             await _bookRepository.Remove(book);
         }
 
-        public async Task<List<Book>> GetAll(int? userId)
+        public async Task<List<Book>> GetAll(string userId)
         {
             var books = await _bookRepository.GetAll(userId);
             return books;
         }
 
-        public async Task<Book> SearchByTitle(string title,int? userId)
+        public async Task<Book> SearchByTitle(string title,string userId)
         {
             return await _bookRepository.SearchByTitle(title,userId);
         }

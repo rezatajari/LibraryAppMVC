@@ -32,7 +32,7 @@ namespace YourProject.Services
             // Create the email message
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(smtpUser, "Library System"), // Sender's email
+                From = new MailAddress(smtpUser, "Library confirmation your email"), // Sender's email
                 Subject = subject, // Email subject
                 Body = message, // Email body
                 IsBodyHtml = true // Allow HTML in the email content

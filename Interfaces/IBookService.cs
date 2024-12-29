@@ -5,9 +5,9 @@ namespace LibraryAppMVC.Interfaces
 {
     public interface IBookService
     {
-        Task Add(int? userId, BookViewModel model);
+        Task Add(string userId, BookViewModel model);
         Task Remove(Book book);
-        Task<List<Book>> GetAll(int? userId);
-        Task<Book> SearchByTitle(string title,int? userId);
+        Task<List<Book>> GetAll(string userId);
+        Task<Book> SearchByTitle(string title, string userId);
     }
 }

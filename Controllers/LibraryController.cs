@@ -1,4 +1,5 @@
-﻿using LibraryAppMVC.Interfaces;
+﻿using System.Security.Claims;
+using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +8,8 @@ namespace LibraryAppMVC.Controllers
     public class LibraryController : Controller
     {
         private readonly IBookService _bookService;
-        public LibraryController(IBookService bookService)
+        private readonly IAccountService _accountService;
+        public LibraryController(IBookService bookService, IAccountService accountService)
         {
             _bookService = bookService;
         }
@@ -31,7 +33,7 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                var userId = HttpContext.Session.GetInt32("UserId");
+                var userId = _accountService.GetCurrentUserId();
 
                 if (userId == null)
                 {
@@ -57,7 +59,7 @@ namespace LibraryAppMVC.Controllers
                 return View();
             }
 
-            var userId = HttpContext.Session.GetInt32("UserId");
+            var userId = _accountService.GetCurrentUserId();
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "User not logged in!";
@@ -81,7 +83,8 @@ namespace LibraryAppMVC.Controllers
         [HttpGet]
         public async Task<IActionResult> List()
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
+            var userId = _accountService.GetCurrentUserId();
+
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "User not logged in!";
@@ -129,7 +132,7 @@ namespace LibraryAppMVC.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchByTitle(string title)
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
+            var userId = _accountService.GetCurrentUserId();
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "User not logged in!";

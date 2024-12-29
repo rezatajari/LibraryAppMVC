@@ -13,7 +13,7 @@ namespace LibraryAppMVC.Validators
             _bookRepository = bookRepository;
         }
 
-        public async Task<bool> ExistValidation(Book book,int? userId)
+        public async Task<bool> ExistValidation(Book book,string userId)
         {
             return await _bookRepository.ExistValidation(book,userId);
         }

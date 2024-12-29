@@ -28,7 +28,7 @@ namespace LibraryAppMVC.Repositories
             await _libraryDB.SaveChangesAsync();
         }
 
-        public async Task<List<Book>> GetAll(int? userId)
+        public async Task<List<Book>> GetAll(string userId)
         {
             var bookList = await _libraryDB.Transactions
                                     .Where(u => u.UserId == userId)
@@ -38,7 +38,7 @@ namespace LibraryAppMVC.Repositories
             return bookList;
         }
 
-        public async Task<Book> SearchByTitle(string title, int? userId)
+        public async Task<Book> SearchByTitle(string title, string userId)
         {
             var book = await _libraryDB.Transactions
                                         .Where(b => b.Book.Title == title && b.UserId == userId)
@@ -47,7 +47,7 @@ namespace LibraryAppMVC.Repositories
             return book;
         }
 
-        public async Task<bool> ExistValidation(Book book, int? userId)
+        public async Task<bool> ExistValidation(Book book, string userId)
         {
             return await _libraryDB.Transactions
                                    .Where(b => b.Book.Title == book.Title && b.Book.Author == book.Author && b.UserId == userId)

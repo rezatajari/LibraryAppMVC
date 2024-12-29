@@ -12,9 +12,9 @@ namespace LibraryAppMVC.Controllers
             return View();
         }
 
-        [Route("Home/Error")]
+        [Route(template: "Home/Error")]
         [HttpGet]
-        public IActionResult HandleError()
+        public IActionResult Error()
         {
             var exception = HttpContext.Features.Get<IExceptionHandlerFeature>();
 

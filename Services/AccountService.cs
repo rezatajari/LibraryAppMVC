@@ -1,6 +1,13 @@
 ﻿using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
 using LibraryAppMVC.ViewModels;
+using Microsoft.AspNetCore.Identity;
+using System;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
+using NuGet.Protocol;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace LibraryAppMVC.Services
 {
@@ -8,47 +15,128 @@ namespace LibraryAppMVC.Services
     {
         private readonly IAccountRepository _accountRepository;
         private readonly ILogger<BookService> _logger;
-        public AccountService(IAccountRepository accountRepository, ILogger<BookService> logger)
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        private readonly IUrlHelper _urlHelper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public AccountService(IAccountRepository accountRepository, ILogger<BookService> logger,
+                UserManager<User> userManager, SignInManager<User> signInManager,
+                IUrlHelperFactory helperFactory, IHttpContextAccessor httpContextAccessor)
         {
             _accountRepository = accountRepository;
             _logger = logger;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _httpContextAccessor = httpContextAccessor;
+            var actionContext = new ActionContext(
+                _httpContextAccessor.HttpContext,
+                _httpContextAccessor.HttpContext.GetRouteData(),
+                new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
+            _urlHelper = helperFactory.GetUrlHelper(actionContext);
         }
 
-        public async Task<User> Login(LoginViewModel model)
+
+        public async Task<SignInResult> Login(LoginViewModel model)
         {
-            _logger.LogInformation("Login servies is run");
-            return await _accountRepository.Login(model);
-        }
-        public async Task<bool> CheckUserExist(string email)
-        {
-            return await _accountRepository.CheckUserExist(email);
+            var user = await FindUserLoginByEmail(model.Email);
+            CheckEmailConfirmation(user);
+
+            var result = await _signInManager.PasswordSignInAsync(userName: user.UserName, password: model.Password,
+                isPersistent: true, lockoutOnFailure: false);
+            return result;
         }
 
-        public async Task<bool> Register(RegisterViewModel model)
+
+        public async Task<IdentityResult> Register(RegisterViewModel model)
         {
-            var user = new User()
+            FindUserRegisterByEmail(model.Email);
+
+            var user = new User
             {
-                UserName = model.UserName,
-                Email = model.Email,
-                Password = model.Password,
-                ConfirmPassword = model.ConfirmPassword,
                 BirthdayDate = model.BirthdayDate
             };
-
-            await _accountRepository.Register(user);
-            return true;
+            var result = await _userManager.CreateAsync(user, model.Password);
+            return result;
         }
 
-        public async Task<User> GetUserById(int? id)
+        private async Task FindUserRegisterByEmail(string email)
         {
-            return await _accountRepository.GetUserById(id);
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+                throw new Exception("An account with this email already exists.");
         }
 
-        public async Task EditProfileUser(int? userId, ProfileViewModel model)
+        public async Task<string> GenerateEmailConfirmationLink(string email)
         {
-            var user = await _accountRepository.GetUserById(userId);
-            user.Email = model.Email;
+            var user = await _userManager.FindByEmailAsync(email);
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            return _urlHelper.Action(
+                 action: "ConfirmEmail",
+                 controller: "Account",
+                 new { userId = user.Id, token = token },
+                 protocol: _httpContextAccessor.HttpContext.Request.Scheme
+             );
+        }
+
+        public async Task<(bool Success, User user)> TryConfirmationProcess(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+                return (false, null);
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return (false, null);
+
+            return (true, user);
+        }
+
+        public async Task<IdentityResult> ConfirmEmail(User user, string token)
+        {
+            return await _userManager.ConfirmEmailAsync(user, token);
+        }
+
+        public string GetCurrentUserId()
+        {
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            return userId;
+        }
+
+        private bool CheckEmailConfirmation(User user)
+        {
+            var Check = user is { EmailConfirmed: false };
+            if (!Check)
+                throw new Exception("Email is not confirmed. Please confirm your email to log in.");
+
+            return Check;
+        }
+
+        public async Task<User> FindUserLoginByEmail(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                throw new Exception("User does not exist.");
+
+            return user;
+        }
+
+        public async Task<ProfileViewModel> ProfileEditPage(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            var profileEdit = new ProfileViewModel
+            {
+                Email = user.Email,
+                UserName = user.UserName,
+                ExistProfilePicture = user.ProfilePicturePath
+            };
+            return profileEdit;
+        }
+
+        public async Task EditProfileUserByEmail(ProfileViewModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
             user.UserName = model.UserName;
+            user.Email = model.Email;
 
             if (model.ProfilePicture != null)
             {
@@ -72,23 +160,28 @@ namespace LibraryAppMVC.Services
             await _accountRepository.UpdateUser(user);
         }
 
-        public async Task<bool> EmailEditExist(int? userId, string email)
+
+        public async Task<bool> EmailEditExist(string newEmail)
         {
-            var emailExists = await _accountRepository.EmailExists(userId, email);
+            var user = await _userManager.FindByEmailAsync(newEmail);
 
-            if (emailExists)
-            {
-                return true;
-            }
-
-            return false;
+            return user != null;
         }
 
-        public async Task<bool> RemoveUser(int? userId)
+        public async Task<(bool Success, string ErrorMessage)> DeleteAccount(string email)
         {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return (false, "User not found");
 
-            var user = await _accountRepository.GetUserById(userId);
-            return await _accountRepository.RemoveUser(user);
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return (false, $"Failed to delete user: {errors}");
+            }
+
+            return (true, null);
         }
     }
 }
