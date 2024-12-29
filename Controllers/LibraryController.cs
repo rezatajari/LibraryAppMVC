@@ -20,15 +20,13 @@ namespace LibraryAppMVC.Controllers
             return View();
         }
 
-        [Route("library/Add")]
-        [HttpGet]
+        [Route("library/Add"), HttpGet]
         public IActionResult Add()
         {
             return View();
         }
 
-        [Route("library/Add")]
-        [HttpPost]
+        [Route("library/Add"), HttpPost]
         public async Task<IActionResult> Add(BookViewModel model)
         {
             if (ModelState.IsValid)
@@ -50,8 +48,7 @@ namespace LibraryAppMVC.Controllers
             return View(model);
         }
 
-        [Route("library/remove")]
-        [HttpPost]
+        [Route("library/remove"), HttpPost]
         public async Task<IActionResult> Remove(string title)
         {
             if (!ModelState.IsValid)
@@ -79,8 +76,7 @@ namespace LibraryAppMVC.Controllers
 
         }
 
-        [Route("library/list")]
-        [HttpGet]
+        [Route("library/list"), HttpGet]
         public async Task<IActionResult> List()
         {
             var userId = _accountService.GetCurrentUserId();
@@ -121,15 +117,13 @@ namespace LibraryAppMVC.Controllers
             return View(createModel);
         }
 
-        [HttpGet]
-        [Route("Library/Search")]
+        [HttpGet, Route("Library/Search")]
         public IActionResult Search()
         {
             return View();
         }
 
-        [Route("library/SearchByTitle")]
-        [HttpPost]
+        [Route("library/SearchByTitle"), HttpPost]
         public async Task<IActionResult> SearchByTitle(string title)
         {
             var userId = _accountService.GetCurrentUserId();
@@ -156,9 +150,7 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction("BookDetails", bookModel);
         }
 
-        [HttpPost]
-        [HttpGet]
-        [Route("Library/BookDetails")]
+        [HttpPost, HttpGet, Route("Library/BookDetails")]
         public IActionResult BookDetails(BookViewModel book)
         {
             ViewBag.Referer = Request.Headers["Referer"].ToString();

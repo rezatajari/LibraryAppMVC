@@ -36,34 +36,47 @@ namespace LibraryAppMVC.Services
         }
 
 
-        public async Task<SignInResult> Login(LoginViewModel model)
+        public async Task<(SignInResult result, string errorMessage)> Login(LoginViewModel model)
         {
-            var user = await FindUserLoginByEmail(model.Email);
-            CheckEmailConfirmation(user);
+            var (user, userError) = await FindUserLoginByEmail(model.Email);
+            if (userError != null)
+                return (result: null, errorMessage: userError);
+
+            var (isValid, confirmationError) = CheckEmailConfirmation(user);
+            if (confirmationError != null)
+                return (result: null, errorMessage: confirmationError);
 
             var result = await _signInManager.PasswordSignInAsync(userName: user.UserName, password: model.Password,
                 isPersistent: true, lockoutOnFailure: false);
-            return result;
+            return (result, null);
         }
 
-
-        public async Task<IdentityResult> Register(RegisterViewModel model)
+        public async Task<User> GetUser()
         {
-            FindUserRegisterByEmail(model.Email);
+            return await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+        }
+        public async Task<(IdentityResult result, string? errorMessage)> Register(RegisterViewModel model)
+        {
+            var errorMessage = await FindUserRegisterByEmail(model.Email);
+
+            if (errorMessage != null)
+                return (null, errorMessage);
 
             var user = new User
             {
-                BirthdayDate = model.BirthdayDate
+                UserName = model.UserName,
+                BirthdayDate = model.BirthdayDate,
+                Email = model.Email
             };
+
             var result = await _userManager.CreateAsync(user, model.Password);
-            return result;
+            return (result, null);
         }
 
-        private async Task FindUserRegisterByEmail(string email)
+        private async Task<string?> FindUserRegisterByEmail(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user != null)
-                throw new Exception("An account with this email already exists.");
+            return user != null ? "An account with this email already exists." : null;
         }
 
         public async Task<string> GenerateEmailConfirmationLink(string email)
@@ -102,37 +115,48 @@ namespace LibraryAppMVC.Services
             return userId;
         }
 
-        private bool CheckEmailConfirmation(User user)
+        private (bool Isvalid, string errorMessage) CheckEmailConfirmation(User user)
         {
-            var Check = user is { EmailConfirmed: false };
-            if (!Check)
-                throw new Exception("Email is not confirmed. Please confirm your email to log in.");
+            var check = user is { EmailConfirmed: false };
 
-            return Check;
+            if (check)
+            {
+                string errorMessage = "Email is not confirmed. Please confirm your email to log in.";
+                return (false, errorMessage);
+            }
+
+            return (true, null);
         }
 
-        public async Task<User> FindUserLoginByEmail(string email)
+        public async Task<(User user, string errorMessage)> FindUserLoginByEmail(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                throw new Exception("User does not exist.");
+            {
+                string errorMessage = "User does not exist.";
+                return (null, errorMessage);
+            }
 
-            return user;
+            return (user, null);
         }
 
-        public async Task<ProfileViewModel> ProfileEditPage(string email)
+        public async Task<(ProfileViewModel profileView, string errorMessage)> GetUserProfile(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            var profileEdit = new ProfileViewModel
+            if (user == null)
+                return (null, "User not found!");
+
+            var profileView = new ProfileViewModel()
             {
-                Email = user.Email,
                 UserName = user.UserName,
+                Email = user.Email,
                 ExistProfilePicture = user.ProfilePicturePath
             };
-            return profileEdit;
+
+            return (profileView, null);
         }
 
-        public async Task EditProfileUserByEmail(ProfileViewModel model)
+        public async Task EditProfileUser(ProfileViewModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             user.UserName = model.UserName;
@@ -149,7 +173,7 @@ namespace LibraryAppMVC.Services
 
                 // Save the file to the folder
                 var filePath = Path.Combine(uploadsFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                await using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await model.ProfilePicture.CopyToAsync(stream);
                 }
@@ -157,15 +181,17 @@ namespace LibraryAppMVC.Services
                 user.ProfilePicturePath = "/uploads/" + fileName;
             }
 
-            await _accountRepository.UpdateUser(user);
+            await _userManager.UpdateAsync(user);
         }
 
-
-        public async Task<bool> EmailEditExist(string newEmail)
+        public async Task<bool> EmailEditExist(string? newEmail)
         {
+            var currentUserId = GetCurrentUserId();
             var user = await _userManager.FindByEmailAsync(newEmail);
+            if (user != null && user.Id != currentUserId)
+                return true;
 
-            return user != null;
+            return false;
         }
 
         public async Task<(bool Success, string ErrorMessage)> DeleteAccount(string email)

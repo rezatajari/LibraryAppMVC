@@ -1,28 +1,19 @@
-﻿using Azure.Identity;
-using LibraryAppMVC.Interfaces;
+﻿using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
-using LibraryAppMVC.Services;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace LibraryAppMVC.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController(
+        IAccountService accountService,
+        ILogger<AccountController> logger,
+        IEmailSender emailSender)
+        : Controller
     {
-
-        private readonly IAccountService _accountService;
-        private readonly ILogger<AccountController> _logger;
-        private readonly IEmailSender _emailSender;
-        public AccountController(IAccountService accountService, ILogger<AccountController> logger,
-                                 IEmailSender emailSender)
-        {
-            _accountService = accountService;
-            _logger = logger;
-            _emailSender = emailSender;
-        }
 
         [HttpGet, Route(template: "Account/Login")]
         public IActionResult Login()
@@ -35,13 +26,23 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-
-                var result = await _accountService.Login(model);
+                var (result, errorMessage) = await accountService.Login(model);
+                if (errorMessage != null)
+                {
+                    ModelState.AddModelError(key: string.Empty, errorMessage);
+                    logger.LogError("{Email} at {Time} has {Error}", model.Email, DateTime.UtcNow, errorMessage);
+                    return View(model);
+                }
 
                 if (result.Succeeded)
+                {
+                    logger.LogInformation("{Email} logged in successfully at {Time}.", model.Email, DateTime.UtcNow);
                     return RedirectToAction("Profile");
+                }
 
                 ModelState.AddModelError(key: string.Empty, errorMessage: "Invalid login attempt.");
+                logger.LogError("{Email} at {Time} has {Error}", model.Email, DateTime.UtcNow, "Invalid login attempt.");
+                return View(model);
             }
             return View(model);
         }
@@ -57,18 +58,20 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _accountService.Register(model);
+                var (result, errorMessage) = await accountService.Register(model);
+                if (errorMessage != null)
+                {
+                    ModelState.AddModelError(string.Empty, errorMessage);
+                    return View(model);
+                }
 
                 if (result.Succeeded)
                 {
-                    // Generate an email confirmation process
-                    var confirmationLink = await _accountService.GenerateEmailConfirmationLink(model.Email);
+                    var confirmationLink = await accountService.GenerateEmailConfirmationLink(model.Email);
 
-                    // Send confirmation email
-                    await _emailSender.SendEmailAsync(model.Email, "Confirm your email",
+                    await emailSender.SendEmailAsync(model.Email, "Confirm your email",
                         $"Please confirm your email by clicking the following link: <a href='{confirmationLink}'>Confirm Email</a>");
 
-                    // Custom notice page
                     return RedirectToAction("RegistrationConfirmationNotice");
                 }
 
@@ -90,14 +93,14 @@ namespace LibraryAppMVC.Controllers
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
 
-            var (isValid, user) = await _accountService.TryConfirmationProcess(userId, token);
+            var (isValid, user) = await accountService.TryConfirmationProcess(userId, token);
 
             if (!isValid)
             {
                 return RedirectToAction(actionName: "Error", controllerName: "Home");
             }
 
-            var result = await _accountService.ConfirmEmail(user, token);
+            var result = await accountService.ConfirmEmail(user, token);
             if (result.Succeeded)
             {
                 return RedirectToAction("ConfirmEmailSuccess");
@@ -113,8 +116,10 @@ namespace LibraryAppMVC.Controllers
         }
 
         [HttpGet, Route(template: "Account/Profile")]
-        public async Task<IActionResult> Profile(User user)
+        public async Task<IActionResult> Profile(string email)
         {
+            var user = await accountService.GetUser();
+
             var profileModel = new ProfileViewModel
             {
                 Email = user.Email,
@@ -125,10 +130,16 @@ namespace LibraryAppMVC.Controllers
             return View(profileModel);
         }
 
-        [HttpGet, Route(template: "Account/EditProfile/{email}")]
+        [HttpGet, Route(template: "Account/EditProfile")]
         public async Task<IActionResult> EditProfile(string email)
         {
-            var profileModel = await _accountService.ProfileEditPage(email);
+            var (profileModel, errorMessage) = await accountService.GetUserProfile(email);
+            if (errorMessage != null)
+            {
+                ModelState.AddModelError(string.Empty, errorMessage);
+                return View();
+            }
+
             return View(profileModel);
         }
 
@@ -137,7 +148,7 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                var emailExists = await _accountService.EmailEditExist(model.Email);
+                var emailExists = await accountService.EmailEditExist(model.Email);
 
                 if (emailExists)
                 {
@@ -145,8 +156,7 @@ namespace LibraryAppMVC.Controllers
                     return View(model);
                 }
 
-                await _accountService.EditProfileUserByEmail(model);
-
+                await accountService.EditProfileUser(model);
                 TempData["SuccessMessage"] = "Profile updated successfully!";
                 return RedirectToAction("Profile");
             }
@@ -157,11 +167,11 @@ namespace LibraryAppMVC.Controllers
         [HttpGet, Route(template: "Account/DeleteAccount/{email}")]
         public async Task<IActionResult> DeleteAccount(string email)
         {
-            var (success, errorMessage) = await _accountService.DeleteAccount(email);
+            var (success, errorMessage) = await accountService.DeleteAccount(email);
 
             if (!success)
             {
-                TempData["ErrorMessage"] = "Somethings wronged!!";
+                TempData["ErrorMessage"] = errorMessage;
                 return RedirectToAction(actionName: "Error", controllerName: "Home");
             }
 
