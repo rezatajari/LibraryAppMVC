@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using System.Security.Claims;
+using NuGet.Protocol;
 using YourProject.Services;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
@@ -86,7 +87,6 @@ namespace LibraryAppMVC.Services
             await _userManager.CreateAsync(user, model.Password);
             return ResultTask<bool>.Success(true);
         }
-
         private async Task<ResultTask<bool>> SendEmailConfirmation(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -114,25 +114,49 @@ namespace LibraryAppMVC.Services
 
             return ResultTask<bool>.Success(true);
         }
+        public async Task<ResultTask<bool>> ConfirmationEmailProcess(string userId, string token)
+        {
+            // Validation userId & token of user
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                const string errorMessage =
+                    "Invalid confirmation link. Please ensure you used the correct link sent to your email.";
+                _logger.LogError("Email confirmation failed: UserId or Token is null or empty at {Time}.",
+                    DateTime.UtcNow);
+                return ResultTask<bool>.Failure(errorMessage);
+            }
+
+            // Get & validation of user 
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                const string errorMessage = "The user does not exist. Please contact support if this issue persists.";
+                _logger.LogError("Email confirmation failed: User not found for UserId {UserId} at {Time}.", userId,
+                    DateTime.UtcNow);
+                return ResultTask<bool>.Failure(errorMessage);
+            }
+
+            // Confirmation email
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                _logger.LogError("Email confirmation failed for UserId {UserId} at {Time}: {Error}",
+                    user.Id,
+                    DateTime.UtcNow,
+                    string.Join(", ", result.Errors.SelectMany(e => e.Description)));
+                return ResultTask<bool>.Failure(
+                    "We couldn't confirm your email. The link might have expired or is invalid. Please request a new confirmation email.");
+            }
+
+            return ResultTask<bool>.Success(true);
+        }
+
 
         public async Task<User> GetUser()
         {
             return await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
         }
-
-
-        public async Task<(bool Success, User user)> TryConfirmationProcess(string userId, string token)
-        {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
-                return (false, null);
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return (false, null);
-
-            return (true, user);
-        }
-
+        
         public async Task<IdentityResult> ConfirmEmail(User user, string token)
         {
             return await _userManager.ConfirmEmailAsync(user, token);

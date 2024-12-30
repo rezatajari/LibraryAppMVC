@@ -51,27 +51,13 @@ namespace LibraryAppMVC.Controllers
             if (!ModelState.IsValid) return View(model);
 
             var result = await accountService.Registration(model);
-            if (!result.Succeeded)
-            {
-                ModelState.AddModelError(string.Empty, result.ErrorMessage);
-                return View(model);
-            }
 
+            if (result.Succeeded)
+                return RedirectToAction("RegistrationConfirmationNotice");
 
-
-            var confirmationLink = await accountService.GenerateEmailConfirmationLink(model.Email);
-
-            await emailSender.SendEmailAsync(model.Email, "Confirm your email",
-                $"Please confirm your email by clicking the following link: <a href='{confirmationLink}'>Confirm Email</a>");
-
-            return RedirectToAction("RegistrationConfirmationNotice");
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
+            ModelState.AddModelError(string.Empty, result.ErrorMessage);
+            return View(model);
         }
-
 
         [HttpGet, Route(template: "Account/RegistrationConfirmationNotice")]
         public IActionResult RegistrationConfirmationNotice()
@@ -82,21 +68,10 @@ namespace LibraryAppMVC.Controllers
         [HttpGet, Route(template: "Account/ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
+            var result = await accountService.ConfirmationEmailProcess(userId, token);
 
-            var (isValid, user) = await accountService.TryConfirmationProcess(userId, token);
-
-            if (!isValid)
-            {
-                return RedirectToAction(actionName: "Error", controllerName: "Home");
-            }
-
-            var result = await accountService.ConfirmEmail(user, token);
-            if (result.Succeeded)
-            {
-                return RedirectToAction("ConfirmEmailSuccess");
-            }
-
-            return RedirectToAction(actionName: "Error", controllerName: "Home");
+            return !result.Succeeded ? RedirectToAction(actionName: "Error", controllerName: "Home") :
+                RedirectToAction("ConfirmEmailSuccess");
         }
 
         [HttpGet]
