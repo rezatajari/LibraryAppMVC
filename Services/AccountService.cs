@@ -3,9 +3,11 @@ using LibraryAppMVC.Models;
 using LibraryAppMVC.Utilities;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using System.Security.Claims;
+using YourProject.Services;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace LibraryAppMVC.Services
@@ -18,9 +20,11 @@ namespace LibraryAppMVC.Services
         private readonly SignInManager<User> _signInManager;
         private readonly IUrlHelper _urlHelper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEmailSender _emailSender;
         public AccountService(IAccountRepository accountRepository, ILogger<BookService> logger,
                 UserManager<User> userManager, SignInManager<User> signInManager,
-                IUrlHelperFactory helperFactory, IHttpContextAccessor httpContextAccessor)
+                IUrlHelperFactory helperFactory, IHttpContextAccessor httpContextAccessor,
+                IEmailSender emailSender)
         {
             _accountRepository = accountRepository;
             _logger = logger;
@@ -32,10 +36,11 @@ namespace LibraryAppMVC.Services
                 _httpContextAccessor.HttpContext.GetRouteData(),
                 new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
             _urlHelper = helperFactory.GetUrlHelper(actionContext);
+            _emailSender = emailSender;
         }
 
 
-        public async Task<ResultTask<SignInResult>> Login(LoginViewModel model)
+        public async Task<ResultTask<SignInResult>> LogIn(LoginViewModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
@@ -49,17 +54,27 @@ namespace LibraryAppMVC.Services
 
             return ResultTask<SignInResult>.Success(result);
         }
-
-        public async Task<User> GetUser()
+        public async Task<ResultTask<bool>> Registration(RegisterViewModel model)
         {
-            return await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+            // register
+            var registerResult = await RegisterUserOnly(model);
+            if (!registerResult.Succeeded)
+                return registerResult;
+
+            // send email
+            var emailResult = await SendEmailConfirmation(model.Email);
+            if (!emailResult.Succeeded)
+                return ResultTask<bool>.Failure(emailResult.ErrorMessage);
+
+            // registration result
+            return ResultTask<bool>.Success(true);
+
         }
-        public async Task<(IdentityResult result, string? errorMessage)> Register(RegisterViewModel model)
+        private async Task<ResultTask<bool>> RegisterUserOnly(RegisterViewModel model)
         {
-            var errorMessage = await FindUserRegisterByEmail(model.Email);
-
-            if (errorMessage != null)
-                return (null, errorMessage);
+            var userExist = await _userManager.FindByEmailAsync(model.Email);
+            if (userExist != null)
+                return ResultTask<bool>.Failure("An account with this email already exists.");
 
             var user = new User
             {
@@ -68,28 +83,43 @@ namespace LibraryAppMVC.Services
                 Email = model.Email
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
-            return (result, null);
+            await _userManager.CreateAsync(user, model.Password);
+            return ResultTask<bool>.Success(true);
         }
 
-        private async Task<string?> FindUserRegisterByEmail(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            return user != null ? "An account with this email already exists." : null;
-        }
-
-        public async Task<string> GenerateEmailConfirmationLink(string email)
+        private async Task<ResultTask<bool>> SendEmailConfirmation(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            return _urlHelper.Action(
-                 action: "ConfirmEmail",
-                 controller: "Account",
-                 new { userId = user.Id, token = token },
-                 protocol: _httpContextAccessor.HttpContext.Request.Scheme
-             );
+            var confirmationLink = _urlHelper.Action(
+                action: "ConfirmEmail",
+                controller: "Account",
+                new { userId = user.Id, token = token },
+                protocol: _httpContextAccessor.HttpContext.Request.Scheme
+            );
+
+            const string subject = "Confirm your email";
+            var message =
+                $"Please confirm your email by clicking the following link: <a href='{confirmationLink}'>Confirm Email</a>";
+            try
+            {
+                await _emailSender.SendEmailAsync(email, subject, message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending email to {Email}", user.Email);
+                return ResultTask<bool>.Failure("Failed to send email.");
+            }
+
+            return ResultTask<bool>.Success(true);
         }
+
+        public async Task<User> GetUser()
+        {
+            return await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+        }
+
 
         public async Task<(bool Success, User user)> TryConfirmationProcess(string userId, string token)
         {

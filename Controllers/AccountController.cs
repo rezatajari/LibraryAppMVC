@@ -26,7 +26,7 @@ namespace LibraryAppMVC.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            var result = await accountService.Login(model);
+            var result = await accountService.LogIn(model);
 
             if (!result.Succeeded)
             {
@@ -48,32 +48,30 @@ namespace LibraryAppMVC.Controllers
         [HttpPost, Route(template: "Account/Register")]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            var result = await accountService.Registration(model);
+            if (!result.Succeeded)
             {
-                var (result, errorMessage) = await accountService.Register(model);
-                if (errorMessage != null)
-                {
-                    ModelState.AddModelError(string.Empty, errorMessage);
-                    return View(model);
-                }
-
-                if (result.Succeeded)
-                {
-                    var confirmationLink = await accountService.GenerateEmailConfirmationLink(model.Email);
-
-                    await emailSender.SendEmailAsync(model.Email, "Confirm your email",
-                        $"Please confirm your email by clicking the following link: <a href='{confirmationLink}'>Confirm Email</a>");
-
-                    return RedirectToAction("RegistrationConfirmationNotice");
-                }
-
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                ModelState.AddModelError(string.Empty, result.ErrorMessage);
+                return View(model);
             }
-            return View(model);
+
+
+
+            var confirmationLink = await accountService.GenerateEmailConfirmationLink(model.Email);
+
+            await emailSender.SendEmailAsync(model.Email, "Confirm your email",
+                $"Please confirm your email by clicking the following link: <a href='{confirmationLink}'>Confirm Email</a>");
+
+            return RedirectToAction("RegistrationConfirmationNotice");
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
         }
+
 
         [HttpGet, Route(template: "Account/RegistrationConfirmationNotice")]
         public IActionResult RegistrationConfirmationNotice()
