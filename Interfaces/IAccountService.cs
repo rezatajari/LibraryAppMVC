@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.Eventing.Reader;
 using LibraryAppMVC.Models;
+using LibraryAppMVC.Utilities;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Identity;
 
@@ -7,7 +8,7 @@ namespace LibraryAppMVC.Interfaces
 {
     public interface IAccountService
     {
-        Task<(SignInResult result, string errorMessage)> Login(LoginViewModel model);
+        Task<ResultTask<SignInResult>> Login(LoginViewModel model);
         Task<bool> EmailEditExist(string? newEmail);
         Task<(ProfileViewModel profileView, string errorMessage)> GetUserProfile(string email);
         Task EditProfileUser(ProfileViewModel model);

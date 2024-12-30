@@ -1,12 +1,11 @@
 ﻿using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
+using LibraryAppMVC.Utilities;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
-using NuGet.Protocol;
+using System.Security.Claims;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace LibraryAppMVC.Services
@@ -36,19 +35,19 @@ namespace LibraryAppMVC.Services
         }
 
 
-        public async Task<(SignInResult result, string errorMessage)> Login(LoginViewModel model)
+        public async Task<ResultTask<SignInResult>> Login(LoginViewModel model)
         {
-            var (user, userError) = await FindUserLoginByEmail(model.Email);
-            if (userError != null)
-                return (result: null, errorMessage: userError);
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return ResultTask<SignInResult>.Failure("User not found!");
 
-            var (isValid, confirmationError) = CheckEmailConfirmation(user);
-            if (confirmationError != null)
-                return (result: null, errorMessage: confirmationError);
+            if (!await _userManager.IsEmailConfirmedAsync(user))
+                return ResultTask<SignInResult>.Failure("Email is not confirmed");
 
-            var result = await _signInManager.PasswordSignInAsync(userName: user.UserName, password: model.Password,
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password,
                 isPersistent: true, lockoutOnFailure: false);
-            return (result, null);
+
+            return ResultTask<SignInResult>.Success(result);
         }
 
         public async Task<User> GetUser()
@@ -115,30 +114,6 @@ namespace LibraryAppMVC.Services
             return userId;
         }
 
-        private (bool Isvalid, string errorMessage) CheckEmailConfirmation(User user)
-        {
-            var check = user is { EmailConfirmed: false };
-
-            if (check)
-            {
-                string errorMessage = "Email is not confirmed. Please confirm your email to log in.";
-                return (false, errorMessage);
-            }
-
-            return (true, null);
-        }
-
-        public async Task<(User user, string errorMessage)> FindUserLoginByEmail(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                string errorMessage = "User does not exist.";
-                return (null, errorMessage);
-            }
-
-            return (user, null);
-        }
 
         public async Task<(ProfileViewModel profileView, string errorMessage)> GetUserProfile(string email)
         {

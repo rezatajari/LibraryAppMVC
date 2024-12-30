@@ -24,27 +24,19 @@ namespace LibraryAppMVC.Controllers
         [HttpPost, Route(template: "Account/Login")]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            var result = await accountService.Login(model);
+
+            if (!result.Succeeded)
             {
-                var (result, errorMessage) = await accountService.Login(model);
-                if (errorMessage != null)
-                {
-                    ModelState.AddModelError(key: string.Empty, errorMessage);
-                    logger.LogError("{Email} at {Time} has {Error}", model.Email, DateTime.UtcNow, errorMessage);
-                    return View(model);
-                }
-
-                if (result.Succeeded)
-                {
-                    logger.LogInformation("{Email} logged in successfully at {Time}.", model.Email, DateTime.UtcNow);
-                    return RedirectToAction("Profile");
-                }
-
-                ModelState.AddModelError(key: string.Empty, errorMessage: "Invalid login attempt.");
-                logger.LogError("{Email} at {Time} has {Error}", model.Email, DateTime.UtcNow, "Invalid login attempt.");
+                ModelState.AddModelError(key: string.Empty, result.ErrorMessage);
+                logger.LogError("{Email} at {Time} has {Error}", model.Email, DateTime.UtcNow, result.ErrorMessage);
                 return View(model);
             }
-            return View(model);
+
+            logger.LogInformation("{Email} logged in successfully at {Time}.", model.Email, DateTime.UtcNow);
+            return RedirectToAction("Profile");
         }
 
         [HttpGet, Route(template: "Account/Register")]
@@ -190,5 +182,9 @@ namespace LibraryAppMVC.Controllers
         {
             return RedirectToAction("Index", "Home");
         }
+
+        //TODO: Jwt or other best practice stragtegy R&D after implement
+        //TODO: best practice for accountservice different by profileservice or not nessesary 
+
     }
 }
