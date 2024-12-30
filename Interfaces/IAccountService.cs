@@ -10,7 +10,7 @@ namespace LibraryAppMVC.Interfaces
     {
         Task<ResultTask<SignInResult>> LogIn(LoginViewModel model);
         Task<ResultTask<bool>> Registration(RegisterViewModel model);
-        Task<ResultTask<bool>> ConfirmationProcess(string userId, string token);
+        Task<ResultTask<bool>> ConfirmationEmailProcess(string userId, string token);
         Task<bool> EmailEditExist(string? newEmail);
         Task<(ProfileViewModel profileView, string errorMessage)> GetUserProfile(string email);
         Task EditProfileUser(ProfileViewModel model);

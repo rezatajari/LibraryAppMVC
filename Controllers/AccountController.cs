@@ -52,17 +52,15 @@ namespace LibraryAppMVC.Controllers
 
             var result = await accountService.Registration(model);
 
-            if (result.Succeeded)
-                return RedirectToAction("RegistrationConfirmationNotice");
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage);
+                return View(model);
+            }
 
-            ModelState.AddModelError(string.Empty, result.ErrorMessage);
-            return View(model);
-        }
-
-        [HttpGet, Route(template: "Account/RegistrationConfirmationNotice")]
-        public IActionResult RegistrationConfirmationNotice()
-        {
-            return View();
+            TempData["Registered"] = "Registration successful! A confirmation email has been sent to your email address." +
+                " Please confirm your email to activate your account.";
+            return RedirectToAction("Login");
         }
 
         [HttpGet, Route(template: "Account/ConfirmEmail")]

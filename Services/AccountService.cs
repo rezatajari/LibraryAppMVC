@@ -84,7 +84,17 @@ namespace LibraryAppMVC.Services
                 Email = model.Email
             };
 
-            await _userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+            {
+                _logger.LogError("Failed to create user {Email} at {Time}: {Errors}",
+                    model.Email,
+                    DateTime.UtcNow,
+                    string.Join(", ",result.Errors.SelectMany(e=>e.Description)));
+             return ResultTask<bool>.Failure(result.Errors.FirstOrDefault()?.Description?? "An error occurred while creating the user.");
+            }
+
+            _logger.LogInformation("User created successfully for {Email} at {Time}.",model.Email,DateTime.UtcNow);
             return ResultTask<bool>.Success(true);
         }
         private async Task<ResultTask<bool>> SendEmailConfirmation(string email)
@@ -156,7 +166,7 @@ namespace LibraryAppMVC.Services
         {
             return await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
         }
-        
+
         public async Task<IdentityResult> ConfirmEmail(User user, string token)
         {
             return await _userManager.ConfirmEmailAsync(user, token);

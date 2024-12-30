@@ -23,7 +23,12 @@
 
                 </div>
             }
-
+            @if (TempData["Registered"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["Registered"]
+                </div>
+            }
             <form asp-action="Login" method="post">
                 <div class="form-group">
                     <label for="Email">Email:</label>

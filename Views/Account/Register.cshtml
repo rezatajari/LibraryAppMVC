@@ -1,5 +1,4 @@
 ﻿@model LibraryAppMVC.ViewModels.RegisterViewModel
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,6 +18,7 @@
                 </div>
             }
             
+ 
             <form asp-action="Register" method="post">
                 <div>
                     <div asp-validation-summary="All" class="text-danger"></div>
@@ -57,6 +57,7 @@
             </form>
 
             <p>Already have an account? <a href="/Account/Login">Login here</a>.</p>
+            
             <a class="btn btn-primary" href="/Home/Index">Home</a>
         </div>
     </div>
