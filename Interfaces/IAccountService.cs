@@ -11,10 +11,10 @@ namespace LibraryAppMVC.Interfaces
         Task<ResultTask<SignInResult>> LogIn(LoginViewModel model);
         Task<ResultTask<bool>> Registration(RegisterViewModel model);
         Task<ResultTask<bool>> ConfirmationEmailProcess(string userId, string token);
+        Task<ResultTask<bool>> DeleteAccount(string email);
         Task<bool> EmailEditExist(string? newEmail);
         Task<(ProfileViewModel profileView, string errorMessage)> GetUserProfile(string email);
         Task EditProfileUser(ProfileViewModel model);
-        Task<(bool Success, string ErrorMessage)> DeleteAccount(string email);
         string GetCurrentUserId();
         Task<User> GetUser();
     }

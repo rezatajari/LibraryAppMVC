@@ -90,11 +90,11 @@ namespace LibraryAppMVC.Services
                 _logger.LogError("Failed to create user {Email} at {Time}: {Errors}",
                     model.Email,
                     DateTime.UtcNow,
-                    string.Join(", ",result.Errors.SelectMany(e=>e.Description)));
-             return ResultTask<bool>.Failure(result.Errors.FirstOrDefault()?.Description?? "An error occurred while creating the user.");
+                    string.Join(", ", result.Errors.SelectMany(e => e.Description)));
+                return ResultTask<bool>.Failure(result.Errors.FirstOrDefault()?.Description ?? "An error occurred while creating the user.");
             }
 
-            _logger.LogInformation("User created successfully for {Email} at {Time}.",model.Email,DateTime.UtcNow);
+            _logger.LogInformation("User created successfully for {Email} at {Time}.", model.Email, DateTime.UtcNow);
             return ResultTask<bool>.Success(true);
         }
         private async Task<ResultTask<bool>> SendEmailConfirmation(string email)
@@ -160,16 +160,23 @@ namespace LibraryAppMVC.Services
 
             return ResultTask<bool>.Success(true);
         }
+        public async Task<ResultTask<bool>> DeleteAccount(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return ResultTask<bool>.Failure("User not found!");
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+                return ResultTask<bool>.Failure(string.Join(", ", result.Errors.SelectMany(e => e.Description)));
+
+            return ResultTask<bool>.Success(true);
+        }
 
 
         public async Task<User> GetUser()
         {
             return await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
-        }
-
-        public async Task<IdentityResult> ConfirmEmail(User user, string token)
-        {
-            return await _userManager.ConfirmEmailAsync(user, token);
         }
 
         public string GetCurrentUserId()
@@ -233,20 +240,5 @@ namespace LibraryAppMVC.Services
             return false;
         }
 
-        public async Task<(bool Success, string ErrorMessage)> DeleteAccount(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-                return (false, "User not found");
-
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded)
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return (false, $"Failed to delete user: {errors}");
-            }
-
-            return (true, null);
-        }
     }
 }

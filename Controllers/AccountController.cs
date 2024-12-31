@@ -78,6 +78,32 @@ namespace LibraryAppMVC.Controllers
             return View();
         }
 
+
+
+
+        [HttpGet, Route(template: "Account/DeleteAccount/{email}")]
+        public async Task<IActionResult> DeleteAccount(string email)
+        {
+            var result = await accountService.DeleteAccount(email);
+
+            if (result.Succeeded) return RedirectToAction("AccountDeleted");
+
+            TempData["ErrorMessage"] = "Failed to deleted your account";
+            return RedirectToAction(actionName: "Error", controllerName: "Home");
+        }
+
+        [HttpGet]
+        public IActionResult AccountDeleted()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
         [HttpGet, Route(template: "Account/Profile")]
         public async Task<IActionResult> Profile(string email)
         {
@@ -127,35 +153,7 @@ namespace LibraryAppMVC.Controllers
         }
 
 
-        [HttpGet, Route(template: "Account/DeleteAccount/{email}")]
-        public async Task<IActionResult> DeleteAccount(string email)
-        {
-            var (success, errorMessage) = await accountService.DeleteAccount(email);
-
-            if (!success)
-            {
-                TempData["ErrorMessage"] = errorMessage;
-                return RedirectToAction(actionName: "Error", controllerName: "Home");
-            }
-
-            await HttpContext.SignOutAsync();
-
-            return RedirectToAction("AccountDeleted");
-        }
-
-        public IActionResult AccountDeleted()
-        {
-            return View();
-        }
-
-        [HttpGet]
-        public IActionResult Logout()
-        {
-            return RedirectToAction("Index", "Home");
-        }
-
         //TODO: Jwt or other best practice stragtegy R&D after implement
-        //TODO: best practice for accountservice different by profileservice or not nessesary 
-
+        // TODO: Seperated Profile section from Account
     }
 }
