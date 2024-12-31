@@ -1,9 +1,11 @@
-﻿using LibraryAppMVC.Interfaces;
+﻿using System.Security.Claims;
+using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace LibraryAppMVC.Controllers
@@ -15,6 +17,7 @@ namespace LibraryAppMVC.Controllers
         : Controller
     {
 
+        //------------------ Account Section ------------------//
         [HttpGet, Route(template: "Account/Login")]
         public IActionResult Login()
         {
@@ -78,9 +81,6 @@ namespace LibraryAppMVC.Controllers
             return View();
         }
 
-
-
-
         [HttpGet, Route(template: "Account/DeleteAccount/{email}")]
         public async Task<IActionResult> DeleteAccount(string email)
         {
@@ -104,32 +104,29 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        //------------------ Profile Section ------------------//
         [HttpGet, Route(template: "Account/Profile")]
         public async Task<IActionResult> Profile(string email)
         {
-            var user = await accountService.GetUser();
+            var result = await accountService.GetUserByEmail(email);
 
-            var profileModel = new ProfileViewModel
-            {
-                Email = user.Email,
-                UserName = user.UserName,
-                ExistProfilePicture = user.ProfilePicturePath
-            };
+            if (result.Succeeded)
+                return View(result.Data);
 
-            return View(profileModel);
+            ModelState.AddModelError(string.Empty, result.ErrorMessage);
+            return View();
         }
 
         [HttpGet, Route(template: "Account/EditProfile")]
         public async Task<IActionResult> EditProfile(string email)
         {
-            var (profileModel, errorMessage) = await accountService.GetUserProfile(email);
-            if (errorMessage != null)
-            {
-                ModelState.AddModelError(string.Empty, errorMessage);
-                return View();
-            }
+            var result = await accountService.GetUserByEmail(email);
 
-            return View(profileModel);
+            if (result.Succeeded)
+                return View(result.Data);
+
+            ModelState.AddModelError(string.Empty, result.ErrorMessage);
+            return View();
         }
 
         [HttpPost, Route(template: "Account/EditProfile")]
@@ -137,15 +134,15 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                var emailExists = await accountService.EmailEditExist(model.Email);
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                if (emailExists)
+                var result = await accountService.EditProfileUser(model, currentUserId);
+                if (!result.Succeeded)
                 {
-                    ModelState.AddModelError("Email", "This email address is already in use.");
+                    ModelState.AddModelError(string.Empty, result.ErrorMessage);
                     return View(model);
                 }
 
-                await accountService.EditProfileUser(model);
                 TempData["SuccessMessage"] = "Profile updated successfully!";
                 return RedirectToAction("Profile");
             }
@@ -154,6 +151,5 @@ namespace LibraryAppMVC.Controllers
 
 
         //TODO: Jwt or other best practice stragtegy R&D after implement
-        // TODO: Seperated Profile section from Account
     }
 }

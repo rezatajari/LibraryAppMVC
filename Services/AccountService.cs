@@ -40,7 +40,7 @@ namespace LibraryAppMVC.Services
             _emailSender = emailSender;
         }
 
-
+        //------------------ Account Services ------------------//
         public async Task<ResultTask<SignInResult>> LogIn(LoginViewModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -173,72 +173,65 @@ namespace LibraryAppMVC.Services
             return ResultTask<bool>.Success(true);
         }
 
-
-        public async Task<User> GetUser()
-        {
-            return await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
-        }
-
-        public string GetCurrentUserId()
-        {
-            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
-            return userId;
-        }
-
-
-        public async Task<(ProfileViewModel profileView, string errorMessage)> GetUserProfile(string email)
+        //------------------ Profile Services ------------------//
+        public async Task<ResultTask<ProfileViewModel>> GetUserByEmail(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                return (null, "User not found!");
+                return ResultTask<ProfileViewModel>.Failure("User is not found!");
 
-            var profileView = new ProfileViewModel()
+            var profile = new ProfileViewModel
             {
                 UserName = user.UserName,
                 Email = user.Email,
                 ExistProfilePicture = user.ProfilePicturePath
             };
 
-            return (profileView, null);
+            return ResultTask<ProfileViewModel>.Success(data: profile);
         }
-
-        public async Task EditProfileUser(ProfileViewModel model)
+        public async Task<ResultTask<bool>> EditProfileUser(ProfileViewModel model, string currentUserId)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            user.UserName = model.UserName;
-            user.Email = model.Email;
+            // Get current user information
+            var currentUser = await _userManager.FindByEmailAsync(model.Email);
+            if (currentUser == null)
+                return ResultTask<bool>.Failure("User by this information is not found.");
 
+            // Existing user by another userId with the new email edited
+            var emailValidation = currentUser is not null && currentUser.Id != currentUserId;
+            if (emailValidation)
+                return ResultTask<bool>.Failure("This email address is already in use.");
+
+            // Set edited new information
+            currentUser.UserName = model.UserName;
+
+            // Generate profile picture path and save picture file
             if (model.ProfilePicture != null)
             {
-                // Define the folder to save the file
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                Directory.CreateDirectory(uploadsFolder);
-
-                // Generate a unique file name
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProfilePicture.FileName);
-
-                // Save the file to the folder
-                var filePath = Path.Combine(uploadsFolder, fileName);
-                await using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await model.ProfilePicture.CopyToAsync(stream);
-                }
-
-                user.ProfilePicturePath = "/uploads/" + fileName;
+                var fileName = await FileNamePictureProfile(model.ProfilePicture);
+                currentUser.ProfilePicturePath = "/uploads/" + fileName;
             }
 
-            await _userManager.UpdateAsync(user);
-        }
+            var result = await _userManager.UpdateAsync(currentUser);
+            if (!result.Succeeded)
+                return ResultTask<bool>.Failure(string.Join(", ", result.Errors.SelectMany(e => e.Description)));
 
-        public async Task<bool> EmailEditExist(string? newEmail)
+            return ResultTask<bool>.Success(true);
+        }
+        private async Task<string> FileNamePictureProfile(IFormFile ProfilePicture)
         {
-            var currentUserId = GetCurrentUserId();
-            var user = await _userManager.FindByEmailAsync(newEmail);
-            if (user != null && user.Id != currentUserId)
-                return true;
+            // Define the folder to save the file
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+            Directory.CreateDirectory(uploadsFolder);
 
-            return false;
+            // Generate a unique file name
+            var fileName = Guid.NewGuid() + Path.GetExtension(ProfilePicture.FileName);
+
+            // Save the file to the folder
+            var filePath = Path.Combine(uploadsFolder, fileName);
+            await using var stream = new FileStream(filePath, FileMode.Create);
+            await ProfilePicture.CopyToAsync(stream);
+
+            return fileName;
         }
-
     }
 }

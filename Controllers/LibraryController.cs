@@ -31,7 +31,7 @@ namespace LibraryAppMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                var userId = _accountService.GetCurrentUserId();
+                var userId = ClaimTypes.NameIdentifier;
 
                 if (userId == null)
                 {
@@ -56,7 +56,7 @@ namespace LibraryAppMVC.Controllers
                 return View();
             }
 
-            var userId = _accountService.GetCurrentUserId();
+            var userId = ClaimTypes.NameIdentifier;
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "User not logged in!";
