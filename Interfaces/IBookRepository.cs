@@ -1,15 +1,18 @@
 ﻿using LibraryAppMVC.Models;
+using LibraryAppMVC.Utilities;
+using LibraryAppMVC.ViewModels;
+using NuGet.Protocol;
 
 namespace LibraryAppMVC.Interfaces
 {
     public interface IBookRepository
     {
-        Task Add(Book book);
-        Task Remove(Book book);
-        Task<List<Book>> GetAll(string userId);
-        Task<Book> SearchByTitle(string title,string userId);
-        Task<bool> ExistValidation(Book book,string userId);
-        Task<int> GetBookIdByTitle(string title);
-        Task AddTransaction(Transaction tx);
+        Task<ResultTask<bool>> Add(Book book);
+        Task<ResultTask<bool>> Remove(Book book);
+        Task<ResultTask<List<Book>>> GetAll(string userId);
+        Task<ResultTask<Book>> GetBookByTitle(string title, string userId);
+        Task<ResultTask<bool>> ExistValidation(BookViewModel book, string userId);
+        Task<ResultTask<Book>> SearchBookByTitle(string title, string userId);
+        Task<ResultTask<bool>> Delete(string userId, string title);
     }
 }

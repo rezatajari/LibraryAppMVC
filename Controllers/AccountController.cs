@@ -24,7 +24,6 @@ namespace LibraryAppMVC.Controllers
             if (!ModelState.IsValid) return View(model);
 
             var result = await accountService.LogIn(model);
-
             if (!result.Succeeded)
             {
                 ModelState.AddModelError(key: string.Empty, result.ErrorMessage);

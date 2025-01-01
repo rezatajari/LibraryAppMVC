@@ -1,7 +1,6 @@
-﻿using LibraryAppMVC.Data;
-using LibraryAppMVC.Interfaces;
+﻿using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
-using LibraryAppMVC.Validators;
+using LibraryAppMVC.Utilities;
 using LibraryAppMVC.ViewModels;
 
 namespace LibraryAppMVC.Services
@@ -9,60 +8,142 @@ namespace LibraryAppMVC.Services
     public class BookService : IBookService
     {
         private readonly IBookRepository _bookRepository;
-        private readonly BookValidator _bookValidator;
-        public BookService(IBookRepository bookRepository,
-            BookValidator bookValidation)
+        private readonly ILogger<BookService> _logger;
+        public BookService(IBookRepository bookRepository, ILogger<BookService> logger)
         {
             _bookRepository = bookRepository;
-            _bookValidator = bookValidation;
+            _logger = logger;
         }
-        public async Task Add(string userId, BookViewModel model)
+        public async Task<ResultTask<bool>> Add(BookViewModel model, string userId)
         {
-            var newBook = new Book()
+            // Check book validation
+            var bookExist = await BookValidationExist(model, userId);
+            if (!bookExist.Succeeded)
+                return ResultTask<bool>.Failure("This book already exist in your account");
+
+            // Create new book assign
+            var newBook = new Book
             {
                 Title = model.Title,
                 Author = model.Author,
-                Genre = model.Genre
+                Genre = model.Genre,
+                UserId = userId
             };
 
-            bool existBook = await _bookValidator.ExistValidation(newBook,userId);
+            // Add to database
+            var result = await _bookRepository.Add(newBook);
 
-            if (existBook)
+            // Check response to add
+            if (!result.Succeeded)
             {
-                throw new ArgumentException("A book with the same title and author already exists.");
+                _logger.LogError(result.ErrorMessage);
+                return ResultTask<bool>.Failure("Error occurred while adding the book");
             }
 
-            await _bookRepository.Add(newBook);
+            _logger.LogInformation("Book {newBook.Title} added successfully.", newBook.Title);
+            return ResultTask<bool>.Success(true);
 
-            int bookId = await _bookRepository.GetBookIdByTitle(newBook.Title);
+        }
+        public async Task<ResultTask<bool>> Remove(BookViewModel model, string userId)
+        {
+            // Check book exist or not
+            var checkBookExist = await BookValidationExist(model, userId);
+            if (!checkBookExist.Succeeded)
+                return ResultTask<bool>.Failure("This book is not exist");
 
-            var tx = new Transaction()
+            // Get book by title
+            var book = await GetBookByTitle(model.Title, userId);
+
+            // Remove operation
+            var result = await _bookRepository.Remove(book.Data);
+            if (!result.Succeeded)
             {
-                UserId = userId,
-                BookId = bookId,
-                TransactionDate = DateTime.UtcNow
+                _logger.LogError(result.ErrorMessage);
+                return ResultTask<bool>.Failure("The remove is failed");
+            }
 
+            _logger.LogInformation("Book {model.Title} removed successfully.", model.Title);
+            return ResultTask<bool>.Success(true);
+        }
+        public async Task<ResultTask<ListBookViewModel>> GetAll(string userId)
+        {
+            var result = await _bookRepository.GetAll(userId);
+            if (!result.Succeeded)
+            {
+                _logger.LogError(result.ErrorMessage);
+                return ResultTask<ListBookViewModel>.Failure("The list of book is not found");
+            }
+
+            var listModel = new ListBookViewModel
+            {
+                bookListViewMode = result.Data.Select(book => new BookViewModel
+                {
+                    Title = book.Title,
+                    Author = book.Author,
+                    Genre = book.Genre
+                }).ToList()
             };
 
-            await _bookRepository.AddTransaction(tx);
-
+            return ResultTask<ListBookViewModel>.Success(data: listModel);
         }
-
-        public async Task Remove(Book book)
+        public async Task<ResultTask<BookViewModel>> SearchByTitle(string title, string userId)
         {
-            await _bookRepository.Remove(book);
-        }
+            // Get book by title & validation it
+            var book = await _bookRepository.SearchBookByTitle(title, userId);
+            if (!book.Succeeded)
+            {
+                _logger.LogError(book.ErrorMessage);
+                return ResultTask<BookViewModel>.Failure(book.ErrorMessage);
+            }
 
-        public async Task<List<Book>> GetAll(string userId)
+            // Generate book model for view
+            var bookModel = new BookViewModel
+            {
+                Title = book.Data.Title,
+                Author = book.Data.Author,
+                Genre = book.Data.Genre
+            };
+
+            _logger.LogInformation("Book {title} is found", title);
+            return ResultTask<BookViewModel>.Success(bookModel);
+        }
+        public async Task<ResultTask<bool>> Delete(string userId, string title)
         {
-            var books = await _bookRepository.GetAll(userId);
-            return books;
+            try
+            {
+               await _bookRepository.Delete(userId, title);
+                _logger.LogInformation("Book {title} is deleted");
+                return ResultTask<bool>.Success(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return ResultTask<bool>.Failure(ex.Message);
+            }
         }
 
-        public async Task<Book> SearchByTitle(string title,string userId)
+        private async Task<ResultTask<bool>> BookValidationExist(BookViewModel newBook, string userId)
         {
-            return await _bookRepository.SearchByTitle(title,userId);
-        }
+            var result = await _bookRepository.ExistValidation(newBook, userId);
 
+            if (result.Succeeded) return ResultTask<bool>.Success(true);
+
+            _logger.LogError(result.ErrorMessage);
+            return ResultTask<bool>.Failure(result.ErrorMessage);
+
+        }
+        private async Task<ResultTask<Book>> GetBookByTitle(string title, string userId)
+        {
+            var result = await _bookRepository.GetBookByTitle(title, userId);
+
+            if (!result.Succeeded)
+            {
+                _logger.LogError(result.ErrorMessage);
+                return ResultTask<Book>.Failure(result.ErrorMessage);
+            }
+
+            _logger.LogInformation("Book {title} is founded", title);
+            return ResultTask<Book>.Success(data: result.Data);
+        }
     }
 }

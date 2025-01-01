@@ -4,7 +4,6 @@ using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
 using LibraryAppMVC.Repositories;
 using LibraryAppMVC.Services;
-using LibraryAppMVC.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -32,6 +31,10 @@ Log.Logger = new LoggerConfiguration().MinimumLevel.Override("Microsoft", LogEve
    .CreateLogger();
 
 builder.Host.UseSerilog();
+builder.Services.AddLogging(logging =>
+{
+    logging.AddSerilog();
+});
 
 builder.Services.AddDbContext<LibraryDB>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDB")));
@@ -56,7 +59,6 @@ builder.Services.AddTransient<IBookRepository, BookRepository>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 builder.Services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<BookValidator>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddAuthentication(configureOptions: options =>
     {

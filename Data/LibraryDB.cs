@@ -13,7 +13,7 @@ namespace LibraryAppMVC.Data
         public DbSet<Book> Books { get; set; }
 
         // public DbSet<User> Users { get; set; } is removed because you are now using ApplicationUser
-        public DbSet<Transaction> Transactions { get; set; }
+        // public DbSet<Transaction> Transactions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -21,13 +21,6 @@ namespace LibraryAppMVC.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
-
-            modelBuilder.Entity<Transaction>()
-                .HasOne(t => t.User)
-                .WithMany(u => u.Transactions)
-                .HasForeignKey(t => t.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
         }
     }
 

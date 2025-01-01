@@ -9,9 +9,5 @@ namespace LibraryAppMVC.Models
         public required string UserId { get; set; }
         public int BookId { get; set; }
         public DateTime TransactionDate { get; set; }
-
-
-        public Book Book { get; set; }
-        public User User { get; set; }
     }
 }

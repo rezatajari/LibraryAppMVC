@@ -9,7 +9,7 @@ namespace LibraryAppMVC.Interfaces
     public interface IAccountService
     {
         //------------------ Account Services ------------------//
-        Task<ResultTask<string>> LogIn(LoginViewModel model);
+        Task<ResultTask<SignInResult>> LogIn(LoginViewModel model);
         Task<ResultTask<bool>> Registration(RegisterViewModel model);
         Task<ResultTask<bool>> ConfirmationEmailProcess(string userId, string token);
         Task<ResultTask<bool>> DeleteAccount(string email);

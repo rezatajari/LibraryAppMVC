@@ -9,7 +9,6 @@ namespace LibraryAppMVC.Models
     {
         public string? ProfilePicturePath { get; set; }
         public DateTime BirthdayDate { get; set; }
-        public ICollection<Transaction> Transactions { get; set; }
 
     }
 }

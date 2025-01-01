@@ -1,4 +1,6 @@
-﻿namespace LibraryAppMVC.Utilities
+﻿using LibraryAppMVC.ViewModels;
+
+namespace LibraryAppMVC.Utilities
 {
     public class ResultTask<T>
     {
