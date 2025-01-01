@@ -15,19 +15,19 @@ namespace LibraryAppMVC.Services
 {
     public class AccountService : IAccountService
     {
-        private readonly IAccountRepository _accountRepository;
         private readonly ILogger<BookService> _logger;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IUrlHelper _urlHelper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailSender _emailSender;
-        public AccountService(IAccountRepository accountRepository, ILogger<BookService> logger,
+        private readonly JwtService _jwtService;
+        public AccountService(ILogger<BookService> logger,
                 UserManager<User> userManager, SignInManager<User> signInManager,
                 IUrlHelperFactory helperFactory, IHttpContextAccessor httpContextAccessor,
-                IEmailSender emailSender)
+                IEmailSender emailSender,
+                JwtService jwtService)
         {
-            _accountRepository = accountRepository;
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -38,22 +38,30 @@ namespace LibraryAppMVC.Services
                 new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
             _urlHelper = helperFactory.GetUrlHelper(actionContext);
             _emailSender = emailSender;
+            _jwtService = jwtService;
         }
 
         //------------------ Account Services ------------------//
-        public async Task<ResultTask<SignInResult>> LogIn(LoginViewModel model)
+        public async Task<ResultTask<string>> LogIn(LoginViewModel model)
         {
+            // Check user exist
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
-                return ResultTask<SignInResult>.Failure("User not found!");
+                return ResultTask<string>.Failure("User not found!");
 
+            // Check user password
+            var passValidation = await _userManager.CheckPasswordAsync(user, model.Password);
+            if (!passValidation)
+                return ResultTask<string>.Failure("Your password is wrong");
+
+            // Check email confirmation
             if (!await _userManager.IsEmailConfirmedAsync(user))
-                return ResultTask<SignInResult>.Failure("Email is not confirmed");
+                return ResultTask<string>.Failure("Email is not confirmed");
 
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password,
-                isPersistent: true, lockoutOnFailure: false);
+            // Generate JWT 
+            var token = _jwtService.GenerateJwtToken(user.Id, user.Email);
 
-            return ResultTask<SignInResult>.Success(result);
+            return ResultTask<string>.Success(token);
         }
         public async Task<ResultTask<bool>> Registration(RegisterViewModel model)
         {

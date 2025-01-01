@@ -79,7 +79,7 @@ namespace LibraryAppMVC.Controllers
         [Route("library/list"), HttpGet]
         public async Task<IActionResult> List()
         {
-            var userId = _accountService.GetCurrentUserId();
+            var userId = ClaimTypes.NameIdentifier;
 
             if (userId == null)
             {
@@ -126,7 +126,7 @@ namespace LibraryAppMVC.Controllers
         [Route("library/SearchByTitle"), HttpPost]
         public async Task<IActionResult> SearchByTitle(string title)
         {
-            var userId = _accountService.GetCurrentUserId();
+            var userId = ClaimTypes.NameIdentifier;
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "User not logged in!";

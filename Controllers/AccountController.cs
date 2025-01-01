@@ -1,19 +1,13 @@
 ﻿using System.Security.Claims;
 using LibraryAppMVC.Interfaces;
-using LibraryAppMVC.Models;
 using LibraryAppMVC.ViewModels;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace LibraryAppMVC.Controllers
 {
     public class AccountController(
         IAccountService accountService,
-        ILogger<AccountController> logger,
-        IEmailSender emailSender)
+        ILogger<AccountController> logger)
         : Controller
     {
 
@@ -132,24 +126,23 @@ namespace LibraryAppMVC.Controllers
         [HttpPost, Route(template: "Account/EditProfile")]
         public async Task<IActionResult> EditProfile(ProfileViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null)
             {
-                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                var result = await accountService.EditProfileUser(model, currentUserId);
-                if (!result.Succeeded)
-                {
-                    ModelState.AddModelError(string.Empty, result.ErrorMessage);
-                    return View(model);
-                }
-
-                TempData["SuccessMessage"] = "Profile updated successfully!";
-                return RedirectToAction("Profile");
+                ModelState.AddModelError(string.Empty, "User is not exist");
+                return View(model);
             }
-            return View(model);
+
+            var result = await accountService.EditProfileUser(model, currentUserId);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Profile updated successfully!";
+            return RedirectToAction("Profile");
         }
-
-
-        //TODO: Jwt or other best practice stragtegy R&D after implement
     }
 }
