@@ -7,21 +7,21 @@ namespace LibraryAppMVC.ViewModels
     {
         [Required]
         [DisplayName("Username")]
-        public string UserName { get; set; }
+        public string? UserName { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public required string Password { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
         [DisplayName("Confirm Password")]
         [Compare("Password", ErrorMessage = "The Confirm Password is not math")]
-        public string ConfirmPassword { get; set; }
+        public required string ConfirmPassword { get; set; }
 
         [Required]
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
-        public string Email { get; set; }
+        public required string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]

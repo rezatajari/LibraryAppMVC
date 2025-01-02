@@ -5,15 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAppMVC.Controllers
 {
-    public class LibraryController : Controller
+    public class LibraryController(IBookService bookService) : Controller
     {
-        private readonly IBookService _bookService;
-        private readonly IAccountService _accountService;
-        public LibraryController(IBookService bookService, IAccountService accountService)
-        {
-            _bookService = bookService;
-        }
-
         [Route(template: "library/home"), HttpGet]
         public IActionResult Home()
         {
@@ -40,7 +33,7 @@ namespace LibraryAppMVC.Controllers
             }
 
             // Add operation
-            var result = await _bookService.Add(model, userId);
+            var result = await bookService.Add(model, userId);
 
             if (result.Succeeded)
             {
@@ -48,7 +41,7 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Home");
             }
 
-            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Add book process is failed");
+            ModelState.AddModelError(string.Empty, errorMessage: result.ErrorMessage ?? "Add failed");
             return View(model);
         }
 
@@ -63,7 +56,7 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var result = await _bookService.Remove(model, userId);
+            var result = await bookService.Remove(model, userId);
             if (!result.Succeeded)
             {
                 TempData["ErrorMessage"] = result.ErrorMessage;
@@ -84,11 +77,11 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Login", controllerName: "Account");
             };
 
-            var result = await _bookService.GetAll(userId);
+            var result = await bookService.GetAll(userId);
             if (result.Succeeded)
                 return View(result.Data);
 
-            ModelState.AddModelError(string.Empty, result.ErrorMessage);
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
             return View();
         }
 
@@ -108,7 +101,7 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("Login", "Account");
             };
 
-            var result = await _bookService.SearchByTitle(title, userId);
+            var result = await bookService.SearchByTitle(title, userId);
             if (!result.Succeeded)
             {
                 TempData["ErrorMessage"] = "This book is not exist";
@@ -128,7 +121,7 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction(actionName: "login", controllerName: "Account");
             }
 
-            var result = await _bookService.Delete(userId, title);
+            var result = await bookService.Delete(userId, title);
             if (!result.Succeeded)
             {
                 TempData["ErrorMessage"] = "Can not delete your book";

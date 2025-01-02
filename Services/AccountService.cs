@@ -6,9 +6,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
-using System.Security.Claims;
-using NuGet.Protocol;
-using YourProject.Services;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace LibraryAppMVC.Services
@@ -44,12 +41,18 @@ namespace LibraryAppMVC.Services
         //------------------ Account Services ------------------//
         public async Task<ResultTask<SignInResult>> LogIn(LoginViewModel model)
         {
+            // Check email exist
+            if (model.Email == null)
+                return ResultTask<SignInResult>.Failure("The email of user is null");
+
             // Check user exist
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
                 return ResultTask<SignInResult>.Failure("User not found!");
 
             // Check user password
+            if(string.IsNullOrEmpty(model.Password))
+                return ResultTask<SignInResult>.Failure("The password is null or empty");
             var passValidation = await _userManager.CheckPasswordAsync(user, model.Password);
             if (!passValidation)
                 return ResultTask<SignInResult>.Failure("Your password is wrong");
@@ -108,13 +111,14 @@ namespace LibraryAppMVC.Services
         private async Task<ResultTask<bool>> SendEmailConfirmation(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return ResultTask<bool>.Failure("User is null");
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var confirmationLink = _urlHelper.Action(
                 action: "ConfirmEmail",
                 controller: "Account",
-                new { userId = user.Id, token = token },
-                protocol: _httpContextAccessor.HttpContext.Request.Scheme
+                new { userId = user.Id, token },
+                protocol: _httpContextAccessor.HttpContext?.Request.Scheme
             );
 
             const string subject = "Confirm your email";
@@ -137,7 +141,7 @@ namespace LibraryAppMVC.Services
             // Validation userId & token of user
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
             {
-                const string errorMessage =
+                const string? errorMessage =
                     "Invalid confirmation link. Please ensure you used the correct link sent to your email.";
                 _logger.LogError("Email confirmation failed: UserId or Token is null or empty at {Time}.",
                     DateTime.UtcNow);
@@ -148,7 +152,7 @@ namespace LibraryAppMVC.Services
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                const string errorMessage = "The user does not exist. Please contact support if this issue persists.";
+                const string? errorMessage = "The user does not exist. Please contact support if this issue persists.";
                 _logger.LogError("Email confirmation failed: User not found for UserId {UserId} at {Time}.", userId,
                     DateTime.UtcNow);
                 return ResultTask<bool>.Failure(errorMessage);
@@ -200,12 +204,13 @@ namespace LibraryAppMVC.Services
         public async Task<ResultTask<bool>> EditProfileUser(ProfileViewModel model, string currentUserId)
         {
             // Get current user information
+            if (model.Email == null) return ResultTask<bool>.Failure("The email is null");
             var currentUser = await _userManager.FindByEmailAsync(model.Email);
             if (currentUser == null)
                 return ResultTask<bool>.Failure("User by this information is not found.");
 
             // Existing user by another userId with the new email edited
-            var emailValidation = currentUser is not null && currentUser.Id != currentUserId;
+            var emailValidation = currentUser.Id != currentUserId;
             if (emailValidation)
                 return ResultTask<bool>.Failure("This email address is already in use.");
 
@@ -225,19 +230,19 @@ namespace LibraryAppMVC.Services
 
             return ResultTask<bool>.Success(true);
         }
-        private async Task<string> FileNamePictureProfile(IFormFile ProfilePicture)
+        private async Task<string> FileNamePictureProfile(IFormFile profilePicture)
         {
             // Define the folder to save the file
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
             Directory.CreateDirectory(uploadsFolder);
 
             // Generate a unique file name
-            var fileName = Guid.NewGuid() + Path.GetExtension(ProfilePicture.FileName);
+            var fileName = Guid.NewGuid() + Path.GetExtension(profilePicture.FileName);
 
             // Save the file to the folder
             var filePath = Path.Combine(uploadsFolder, fileName);
             await using var stream = new FileStream(filePath, FileMode.Create);
-            await ProfilePicture.CopyToAsync(stream);
+            await profilePicture.CopyToAsync(stream);
 
             return fileName;
         }

@@ -5,11 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraryAppMVC.Data
 {
-    public class LibraryDB : IdentityDbContext<User>
+    public class LibraryDb(DbContextOptions<LibraryDb> options) : IdentityDbContext<User>(options)
     {
-        public LibraryDB(DbContextOptions<LibraryDB> options)
-        : base(options) { }
-
         public DbSet<Book> Books { get; set; }
 
         // public DbSet<User> Users { get; set; } is removed because you are now using ApplicationUser
@@ -18,9 +15,27 @@ namespace LibraryAppMVC.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // -------- User ---------
+            modelBuilder.Entity<User>()
+                .Property(u => u.ProfilePicturePath)
+                .HasMaxLength(255);
+
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            // -------- Book ---------
+            modelBuilder.Entity<Book>()
+                .Property(b => b.Title)
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<Book>()
+                .Property(b => b.Author)
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<Book>()
+                .Property(b => b.UserId)
+                .HasMaxLength(100);
         }
     }
 

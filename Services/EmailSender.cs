@@ -2,24 +2,17 @@
 using System.Net.Mail;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
-namespace YourProject.Services
+namespace LibraryAppMVC.Services
 {
-    public class EmailSender : IEmailSender
+    public class EmailSender(IConfiguration configuration) : IEmailSender
     {
-        private readonly IConfiguration _configuration;
-
-        public EmailSender(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
         public async Task SendEmailAsync(string email, string subject, string message)
         {
             // Get SMTP settings from configuration (appsettings.json)
-            var smtpHost = _configuration["SMTP:Host"]; // e.g., smtp.gmail.com
-            var smtpPort = int.Parse(_configuration["SMTP:Port"]); // e.g., 587
-            var smtpUser = _configuration["SMTP:Username"]; // Your email
-            var smtpPass = _configuration["SMTP:Password"]; // Your email password
+            var smtpHost = configuration["SMTP:Host"]; // e.g., smtp.gmail.com
+            var smtpPort = int.Parse(configuration["SMTP:Port"] ?? string.Empty); // e.g., 587
+            var smtpUser = configuration["SMTP:Username"]; // Your email
+            var smtpPass = configuration["SMTP:Password"]; // Your email password
 
             // Set up the SMTP client
             var smtpClient = new SmtpClient(smtpHost)
@@ -32,7 +25,7 @@ namespace YourProject.Services
             // Create the email message
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(smtpUser, "Library confirmation your email"), // Sender's email
+                From = new MailAddress(smtpUser ?? string.Empty, "Library confirmation your email"), // Sender's email
                 Subject = subject, // Email subject
                 Body = message, // Email body
                 IsBodyHtml = true // Allow HTML in the email content

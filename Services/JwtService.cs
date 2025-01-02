@@ -5,17 +5,11 @@ using System.Text;
 
 namespace LibraryAppMVC.Services
 {
-    public class JwtService
+    public class JwtService(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
-        public JwtService(IConfiguration configuration) =>
-                    _configuration = configuration;
-
-
-
         public string GenerateJwtToken(string userId, string userEmail)
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var jwtSettings = configuration.GetSection("JwtSettings");
             var key = Encoding.UTF8.GetBytes(jwtSettings.Key);
 
             var claims = new[]
@@ -31,7 +25,7 @@ namespace LibraryAppMVC.Services
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpiresInMinutes"])),
+                expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpiresInMinutes"] ?? string.Empty)),
                 signingCredentials: credentials
                 );
 

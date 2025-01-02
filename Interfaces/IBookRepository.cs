@@ -1,7 +1,6 @@
 ﻿using LibraryAppMVC.Models;
 using LibraryAppMVC.Utilities;
 using LibraryAppMVC.ViewModels;
-using NuGet.Protocol;
 
 namespace LibraryAppMVC.Interfaces
 {

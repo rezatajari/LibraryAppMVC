@@ -1,5 +1,4 @@
-﻿using LibraryAppMVC.Models;
-using LibraryAppMVC.Utilities;
+﻿using LibraryAppMVC.Utilities;
 using LibraryAppMVC.ViewModels;
 
 namespace LibraryAppMVC.Interfaces

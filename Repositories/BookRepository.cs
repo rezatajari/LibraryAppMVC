@@ -2,28 +2,19 @@
 using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
 using LibraryAppMVC.Utilities;
 using LibraryAppMVC.ViewModels;
 
 namespace LibraryAppMVC.Repositories
 {
-    public class BookRepository : IBookRepository
+    public class BookRepository(LibraryDb libraryDb) : IBookRepository
     {
-
-        private readonly LibraryDB _libraryDB;
-        public BookRepository(LibraryDB libraryDB)
-        {
-            _libraryDB = libraryDB;
-        }
-
         public async Task<ResultTask<bool>> Add(Book book)
         {
             try
             {
-                await _libraryDB.Books.AddAsync(book);
-                await _libraryDB.SaveChangesAsync();
+                await libraryDb.Books.AddAsync(book);
+                await libraryDb.SaveChangesAsync();
 
                 return ResultTask<bool>.Success(true);
             }
@@ -37,8 +28,8 @@ namespace LibraryAppMVC.Repositories
         {
             try
             {
-                _libraryDB.Books.Remove(book);
-                await _libraryDB.SaveChangesAsync();
+                libraryDb.Books.Remove(book);
+                await libraryDb.SaveChangesAsync();
                 return ResultTask<bool>.Success(true);
             }
             catch (Exception ex)
@@ -51,7 +42,7 @@ namespace LibraryAppMVC.Repositories
         {
             try
             {
-                var bookList = await _libraryDB.Books
+                var bookList = await libraryDb.Books
                     .Where(u => u.UserId == userId)
                     .ToListAsync();
 
@@ -67,11 +58,11 @@ namespace LibraryAppMVC.Repositories
         {
             try
             {
-                var book = await _libraryDB.Books
+                var book = await libraryDb.Books
                     .Where(b => b.Title == title && b.UserId == userId)
                     .FirstOrDefaultAsync();
 
-                return ResultTask<Book>.Success(data: book);
+                return book != null ? ResultTask<Book>.Success(data: book) : ResultTask<Book>.Failure("Something wrong");
             }
             catch (Exception ex)
             {
@@ -83,7 +74,7 @@ namespace LibraryAppMVC.Repositories
         {
             try
             {
-                await _libraryDB.Books
+                await libraryDb.Books
                     .Where(b => b.Title == book.Title && b.Author == book.Author && b.UserId == userId)
                     .AnyAsync();
 
@@ -99,8 +90,9 @@ namespace LibraryAppMVC.Repositories
         {
             try
             {
-                var book = await _libraryDB.Books.FirstOrDefaultAsync(b => b.Title == title && b.UserId == userId);
-                return ResultTask<Book>.Success(book);
+                var book = await libraryDb.Books.FirstOrDefaultAsync(b => b.Title == title && b.UserId == userId);
+                if (book != null) return ResultTask<Book>.Success(book);
+                return ResultTask<Book>.Failure("Book is null");
             }
             catch (Exception ex)
             {
@@ -112,9 +104,9 @@ namespace LibraryAppMVC.Repositories
         {
             try
             {
-                var book = await _libraryDB.Books.FirstOrDefaultAsync(b => b.Title == title && b.UserId == userId);
-                _libraryDB.Books.Remove(book);
-                await _libraryDB.SaveChangesAsync();
+                var book = await libraryDb.Books.FirstOrDefaultAsync(b => b.Title == title && b.UserId == userId);
+                if (book != null) libraryDb.Books.Remove(book);
+                await libraryDb.SaveChangesAsync();
                 return ResultTask<bool>.Success(true);
             }
             catch (Exception ex)

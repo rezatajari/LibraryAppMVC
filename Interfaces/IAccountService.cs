@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.Eventing.Reader;
-using LibraryAppMVC.Models;
-using LibraryAppMVC.Utilities;
+﻿using LibraryAppMVC.Utilities;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Identity;
 

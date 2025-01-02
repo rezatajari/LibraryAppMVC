@@ -1,9 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace LibraryAppMVC.ViewModels
+﻿namespace LibraryAppMVC.ViewModels
 {
     public class ListBookViewModel
     {
-        public List<BookViewModel> bookListViewMode { get; set; }
+        public List<BookViewModel>? BookListViewMode { get; set; }
     }
 }

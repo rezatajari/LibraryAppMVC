@@ -1,4 +1,3 @@
-using System.Text;
 using LibraryAppMVC.Data;
 using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
@@ -13,7 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
-using YourProject.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +34,7 @@ builder.Services.AddLogging(logging =>
     logging.AddSerilog();
 });
 
-builder.Services.AddDbContext<LibraryDB>(options =>
+builder.Services.AddDbContext<LibraryDb>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDB")));
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -50,7 +48,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
         options.Password.RequireLowercase = false;
         options.SignIn.RequireConfirmedEmail = true;
     })
-    .AddEntityFrameworkStores<LibraryDB>()
+    .AddEntityFrameworkStores<LibraryDb>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IEmailSender, EmailSender>();
@@ -76,7 +74,7 @@ builder.Services.AddAuthentication(configureOptions: options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Key"))
+            IssuerSigningKey = new SymmetricSecurityKey("Key"u8.ToArray())
         };
     });
 

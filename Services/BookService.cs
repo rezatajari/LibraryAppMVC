@@ -5,15 +5,9 @@ using LibraryAppMVC.ViewModels;
 
 namespace LibraryAppMVC.Services
 {
-    public class BookService : IBookService
+    public class BookService(IBookRepository bookRepository, ILogger<BookService> logger)
+        : IBookService
     {
-        private readonly IBookRepository _bookRepository;
-        private readonly ILogger<BookService> _logger;
-        public BookService(IBookRepository bookRepository, ILogger<BookService> logger)
-        {
-            _bookRepository = bookRepository;
-            _logger = logger;
-        }
         public async Task<ResultTask<bool>> Add(BookViewModel model, string userId)
         {
             // Check book validation
@@ -31,16 +25,16 @@ namespace LibraryAppMVC.Services
             };
 
             // Add to database
-            var result = await _bookRepository.Add(newBook);
+            var result = await bookRepository.Add(newBook);
 
             // Check response to add
             if (!result.Succeeded)
             {
-                _logger.LogError(result.ErrorMessage);
+                logger.LogError(result.ErrorMessage);
                 return ResultTask<bool>.Failure("Error occurred while adding the book");
             }
 
-            _logger.LogInformation("Book {newBook.Title} added successfully.", newBook.Title);
+            logger.LogInformation("Book {newBook.Title} added successfully.", newBook.Title);
             return ResultTask<bool>.Success(true);
 
         }
@@ -55,48 +49,59 @@ namespace LibraryAppMVC.Services
             var book = await GetBookByTitle(model.Title, userId);
 
             // Remove operation
-            var result = await _bookRepository.Remove(book.Data);
-            if (!result.Succeeded)
+            if (book.Data != null)
             {
-                _logger.LogError(result.ErrorMessage);
-                return ResultTask<bool>.Failure("The remove is failed");
+                var result = await bookRepository.Remove(book.Data);
+                if (!result.Succeeded)
+                {
+                    logger.LogError(result.ErrorMessage);
+                    return ResultTask<bool>.Failure("The remove is failed");
+                }
             }
 
-            _logger.LogInformation("Book {model.Title} removed successfully.", model.Title);
+            logger.LogInformation("Book {model.Title} removed successfully.", model.Title);
             return ResultTask<bool>.Success(true);
         }
         public async Task<ResultTask<ListBookViewModel>> GetAll(string userId)
         {
-            var result = await _bookRepository.GetAll(userId);
+            var result = await bookRepository.GetAll(userId);
             if (!result.Succeeded)
             {
-                _logger.LogError(result.ErrorMessage);
+                logger.LogError(result.ErrorMessage);
                 return ResultTask<ListBookViewModel>.Failure("The list of book is not found");
             }
 
-            var listModel = new ListBookViewModel
+            if (result.Data != null)
             {
-                bookListViewMode = result.Data.Select(book => new BookViewModel
+                var listModel = new ListBookViewModel
                 {
-                    Title = book.Title,
-                    Author = book.Author,
-                    Genre = book.Genre
-                }).ToList()
-            };
+                    BookListViewMode = result.Data.Select(book => new BookViewModel
+                    {
+                        Title = book.Title,
+                        Author = book.Author,
+                        Genre = book.Genre
+                    }).ToList()
+                };
 
-            return ResultTask<ListBookViewModel>.Success(data: listModel);
+                return ResultTask<ListBookViewModel>.Success(data: listModel);
+            }
+
+            logger.LogError(result.ErrorMessage);
+            return ResultTask<ListBookViewModel>.Failure("Get list has error");
         }
         public async Task<ResultTask<BookViewModel>> SearchByTitle(string title, string userId)
         {
             // Get book by title & validation it
-            var book = await _bookRepository.SearchBookByTitle(title, userId);
+            var book = await bookRepository.SearchBookByTitle(title, userId);
             if (!book.Succeeded)
             {
-                _logger.LogError(book.ErrorMessage);
+                logger.LogError(book.ErrorMessage);
                 return ResultTask<BookViewModel>.Failure(book.ErrorMessage);
             }
 
             // Generate book model for view
+            if (book.Data == null) 
+                return ResultTask<BookViewModel>.Failure("The book is null");
             var bookModel = new BookViewModel
             {
                 Title = book.Data.Title,
@@ -104,46 +109,51 @@ namespace LibraryAppMVC.Services
                 Genre = book.Data.Genre
             };
 
-            _logger.LogInformation("Book {title} is found", title);
+            logger.LogInformation("Book {title} is found", title);
             return ResultTask<BookViewModel>.Success(bookModel);
         }
         public async Task<ResultTask<bool>> Delete(string userId, string title)
         {
             try
             {
-               await _bookRepository.Delete(userId, title);
-                _logger.LogInformation("Book {title} is deleted");
+                await bookRepository.Delete(userId, title);
+                logger.LogInformation("Book {title} is deleted", title);
                 return ResultTask<bool>.Success(true);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                logger.LogError(ex.Message);
                 return ResultTask<bool>.Failure(ex.Message);
             }
         }
 
         private async Task<ResultTask<bool>> BookValidationExist(BookViewModel newBook, string userId)
         {
-            var result = await _bookRepository.ExistValidation(newBook, userId);
+            var result = await bookRepository.ExistValidation(newBook, userId);
 
             if (result.Succeeded) return ResultTask<bool>.Success(true);
 
-            _logger.LogError(result.ErrorMessage);
+            logger.LogError(result.ErrorMessage);
             return ResultTask<bool>.Failure(result.ErrorMessage);
 
         }
-        private async Task<ResultTask<Book>> GetBookByTitle(string title, string userId)
+        private async Task<ResultTask<Book>> GetBookByTitle(string? title, string userId)
         {
-            var result = await _bookRepository.GetBookByTitle(title, userId);
+            // Check title is exist or not
+            if (string.IsNullOrEmpty(title))
+                return ResultTask<Book>.Failure("Title is null or empty");
+
+            var result = await bookRepository.GetBookByTitle(title, userId);
 
             if (!result.Succeeded)
             {
-                _logger.LogError(result.ErrorMessage);
+                logger.LogError(result.ErrorMessage);
                 return ResultTask<Book>.Failure(result.ErrorMessage);
             }
 
-            _logger.LogInformation("Book {title} is founded", title);
-            return ResultTask<Book>.Success(data: result.Data);
+            logger.LogInformation("Book {title} is founded", title);
+            if (result.Data != null) return ResultTask<Book>.Success(data: result.Data);
+            return ResultTask<Book>.Failure("Book is null");
         }
     }
 }

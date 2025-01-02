@@ -46,8 +46,8 @@
                     <button type="submit" class="btn btn-primary">Login</button>
                 </div>
             </form>
-            <a class="btn btn-primary" href="/Home/Index">Home</a>
-            <p>Don't have an account? <a href="/Account/Register">Register here</a>.</p>
+            <a class="btn btn-primary" asp-controller="Home" asp-action="Index" >Home</a>
+            <p>Don't have an account? <a asp-controller="Account" asp-action="Register">Register here</a>.</p>
         </div>
     </div>
 </body>

@@ -26,7 +26,7 @@ namespace LibraryAppMVC.Controllers
             var result = await accountService.LogIn(model);
             if (!result.Succeeded)
             {
-                ModelState.AddModelError(key: string.Empty, result.ErrorMessage);
+                ModelState.AddModelError(key: string.Empty, result.ErrorMessage ?? "Log in failed");
                 logger.LogError("{Email} at {Time} has {Error}", model.Email, DateTime.UtcNow, result.ErrorMessage);
                 return View(model);
             }
@@ -50,7 +50,7 @@ namespace LibraryAppMVC.Controllers
 
             if (!result.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, result.ErrorMessage);
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Registration is failed");
                 return View(model);
             }
 
@@ -106,7 +106,7 @@ namespace LibraryAppMVC.Controllers
             if (result.Succeeded)
                 return View(result.Data);
 
-            ModelState.AddModelError(string.Empty, result.ErrorMessage);
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
             return View();
         }
 
@@ -118,7 +118,7 @@ namespace LibraryAppMVC.Controllers
             if (result.Succeeded)
                 return View(result.Data);
 
-            ModelState.AddModelError(string.Empty, result.ErrorMessage);
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
             return View();
         }
 
@@ -136,7 +136,7 @@ namespace LibraryAppMVC.Controllers
             var result = await accountService.EditProfileUser(model, currentUserId);
             if (!result.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, result.ErrorMessage);
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
                 return View(model);
             }
 
