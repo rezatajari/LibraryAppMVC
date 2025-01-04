@@ -11,7 +11,7 @@ namespace LibraryAppMVC.ViewModels
 
         [Required]
         [StringLength(50, ErrorMessage = "Author cannot be longer than 50 characters.")]
-        public required string Author { get; set; }
+        public required string? Author { get; set; }
 
         [Required]
         [EnumDataType(typeof(GenreType))]

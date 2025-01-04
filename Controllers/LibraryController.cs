@@ -7,18 +7,21 @@ namespace LibraryAppMVC.Controllers
 {
     public class LibraryController(IBookService bookService) : Controller
     {
+        //================================ Account Section ================================//
+
+        //------- Home Section -------//
         [Route(template: "library/home"), HttpGet]
         public IActionResult Home()
         {
             return View();
         }
 
+        //------- Add Section -------//
         [Route(template: "library/Add"), HttpGet]
         public IActionResult Add()
         {
             return View();
         }
-
         [Route(template: "library/Add"), HttpPost]
         public async Task<IActionResult> Add(BookViewModel model)
         {
@@ -45,6 +48,7 @@ namespace LibraryAppMVC.Controllers
             return View(model);
         }
 
+        //------- Remove Section -------//
         [Route(template: "library/remove"), HttpPost]
         public async Task<IActionResult> Remove(BookViewModel model)
         {
@@ -67,6 +71,7 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction("List");
         }
 
+        //------- List Section -------//
         [Route(template: "library/list"), HttpGet]
         public async Task<IActionResult> List()
         {
@@ -75,7 +80,7 @@ namespace LibraryAppMVC.Controllers
             {
                 TempData["ErrorMessage"] = "User not logged in!";
                 return RedirectToAction("Login", controllerName: "Account");
-            };
+            }
 
             var result = await bookService.GetAll(userId);
             if (result.Succeeded)
@@ -85,12 +90,12 @@ namespace LibraryAppMVC.Controllers
             return View();
         }
 
+        //------- Search Section -------//
         [HttpGet, Route(template: "Library/Search")]
         public IActionResult Search()
         {
             return View();
         }
-
         [Route(template: "library/SearchByTitle"), HttpPost]
         public async Task<IActionResult> SearchByTitle(string title)
         {
@@ -99,7 +104,7 @@ namespace LibraryAppMVC.Controllers
             {
                 TempData["ErrorMessage"] = "User not logged in!";
                 return RedirectToAction("Login", "Account");
-            };
+            }
 
             var result = await bookService.SearchByTitle(title, userId);
             if (!result.Succeeded)
@@ -111,6 +116,7 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction("BookDetails", result.Data);
         }
 
+        //------- Delete Section -------//
         [Route(template: "Library/Delete/{title}"), HttpPost]
         public async Task<IActionResult> Delete(string title)
         {
@@ -133,6 +139,7 @@ namespace LibraryAppMVC.Controllers
 
         }
 
+        //------- Details Section -------//
         [HttpGet, Route(template: "Library/BookDetails")]
         public IActionResult BookDetails(BookViewModel book)
         {

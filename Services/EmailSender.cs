@@ -8,7 +8,7 @@ namespace LibraryAppMVC.Services
     {
         public async Task SendEmailAsync(string email, string subject, string message)
         {
-            // Get SMTP settings from configuration (appsettings.json)
+            // Get SMTP settings from configuration (app settings.json)
             var smtpHost = configuration["SMTP:Host"]; // e.g., smtp.gmail.com
             var smtpPort = int.Parse(configuration["SMTP:Port"] ?? string.Empty); // e.g., 587
             var smtpUser = configuration["SMTP:Username"]; // Your email

@@ -10,14 +10,14 @@ namespace LibraryAppMVC.Controllers
         ILogger<AccountController> logger)
         : Controller
     {
+        //================================ Account Section ================================//
 
-        //------------------ Account Section ------------------//
+        //------- Login Section -------//
         [HttpGet, Route(template: "Account/Login")]
         public IActionResult Login()
         {
             return View();
         }
-
         [HttpPost, Route(template: "Account/Login")]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -35,12 +35,12 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction("Profile");
         }
 
+        //------- Register Section -------//
         [HttpGet, Route(template: "Account/Register")]
         public ActionResult Register()
         {
             return View();
         }
-
         [HttpPost, Route(template: "Account/Register")]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
@@ -59,6 +59,7 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction("Login");
         }
 
+        //------- Confirmation Email Section -------//
         [HttpGet, Route(template: "Account/ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -67,13 +68,13 @@ namespace LibraryAppMVC.Controllers
             return !result.Succeeded ? RedirectToAction(actionName: "Error", controllerName: "Home") :
                 RedirectToAction("ConfirmEmailSuccess");
         }
-
         [HttpGet]
         public IActionResult ConfirmEmailSuccess()
         {
             return View();
         }
 
+        //------- Delete Account Section -------//
         [HttpGet, Route(template: "Account/DeleteAccount/{email}")]
         public async Task<IActionResult> DeleteAccount(string email)
         {
@@ -84,20 +85,22 @@ namespace LibraryAppMVC.Controllers
             TempData["ErrorMessage"] = "Failed to deleted your account";
             return RedirectToAction(actionName: "Error", controllerName: "Home");
         }
-
         [HttpGet]
         public IActionResult AccountDeleted()
         {
             return View();
         }
 
+        //------- Logout Section -------//
         [HttpGet]
         public IActionResult Logout()
         {
             return RedirectToAction("Index", "Home");
         }
 
-        //------------------ Profile Section ------------------//
+        //================================ Profile Section ================================//
+
+        //------- Profile Page Section -------//
         [HttpGet, Route(template: "Account/Profile")]
         public async Task<IActionResult> Profile(string email)
         {
@@ -109,8 +112,10 @@ namespace LibraryAppMVC.Controllers
             ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
             return View();
         }
-
         [HttpGet, Route(template: "Account/EditProfile")]
+
+        //------- Edit Profile Section -------//
+        [HttpGet]
         public async Task<IActionResult> EditProfile(string email)
         {
             var result = await accountService.GetUserByEmail(email);
@@ -121,7 +126,6 @@ namespace LibraryAppMVC.Controllers
             ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
             return View();
         }
-
         [HttpPost, Route(template: "Account/EditProfile")]
         public async Task<IActionResult> EditProfile(ProfileViewModel model)
         {

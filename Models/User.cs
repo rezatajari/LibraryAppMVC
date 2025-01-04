@@ -6,6 +6,5 @@ namespace LibraryAppMVC.Models
     {
         public string? ProfilePicturePath { get; set; }
         public DateTime BirthdayDate { get; set; }
-
     }
 }

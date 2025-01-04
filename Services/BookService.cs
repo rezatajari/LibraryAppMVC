@@ -8,6 +8,7 @@ namespace LibraryAppMVC.Services
     public class BookService(IBookRepository bookRepository, ILogger<BookService> logger)
         : IBookService
     {
+        // ------------ Public ------------
         public async Task<ResultTask<bool>> Add(BookViewModel model, string userId)
         {
             // Check book validation
@@ -100,7 +101,7 @@ namespace LibraryAppMVC.Services
             }
 
             // Generate book model for view
-            if (book.Data == null) 
+            if (book.Data == null)
                 return ResultTask<BookViewModel>.Failure("The book is null");
             var bookModel = new BookViewModel
             {
@@ -126,7 +127,7 @@ namespace LibraryAppMVC.Services
                 return ResultTask<bool>.Failure(ex.Message);
             }
         }
-
+        // ------------ Private ------------
         private async Task<ResultTask<bool>> BookValidationExist(BookViewModel newBook, string userId)
         {
             var result = await bookRepository.ExistValidation(newBook, userId);

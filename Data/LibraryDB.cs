@@ -27,14 +27,10 @@ namespace LibraryAppMVC.Data
             // -------- Book ---------
             modelBuilder.Entity<Book>()
                 .Property(b => b.Title)
-                .HasMaxLength(50);
+                .HasMaxLength(100);
 
             modelBuilder.Entity<Book>()
                 .Property(b => b.Author)
-                .HasMaxLength(50);
-
-            modelBuilder.Entity<Book>()
-                .Property(b => b.UserId)
                 .HasMaxLength(100);
         }
     }
