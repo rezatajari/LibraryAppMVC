@@ -13,16 +13,22 @@
         <div class="form-container">
             <h1>Login</h1>
 
-
-          
-
-            @if (TempData["ErrorMessage"] != null)
+            @if (!ViewData.ModelState.IsValid)
             {
-                <div style="color: red;">
-                    @TempData["ErrorMessage"]
+                <div class="alert alert-danger">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <p>@error.ErrorMessage</p>
+                    }
+
                 </div>
             }
-
+            @if (TempData["Registered"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["Registered"]
+                </div>
+            }
             <form asp-action="Login" method="post">
                 <div class="form-group">
                     <label for="Email">Email:</label>
@@ -33,15 +39,15 @@
                 <div>
                     <label for="Password">Password:</label>
                     <input asp-for="Password" id="Password" type="password" class="form-control" placeholder="Enter your password" required />
-                    <span asp-validation-for="Password" style="color: red;" ></span>
+                    <span asp-validation-for="Password" style="color: red;"></span>
                 </div>
 
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">Login</button>
                 </div>
             </form>
-            <a class="btn btn-primary" href="/Home/Index">Home</a>
-            <p>Don't have an account? <a href="/Account/Register">Register here</a>.</p>
+            <a class="btn btn-primary" asp-controller="Home" asp-action="Index" >Home</a>
+            <p>Don't have an account? <a asp-controller="Account" asp-action="Register">Register here</a>.</p>
         </div>
     </div>
 </body>

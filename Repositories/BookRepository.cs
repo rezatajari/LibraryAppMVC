@@ -2,70 +2,117 @@
 using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
+using LibraryAppMVC.Utilities;
+using LibraryAppMVC.ViewModels;
 
 namespace LibraryAppMVC.Repositories
 {
-    public class BookRepository : IBookRepository
+    public class BookRepository(LibraryDb libraryDb) : IBookRepository
     {
-
-        private readonly LibraryDB _libraryDB;
-        public BookRepository(LibraryDB libraryDB)
+        public async Task<ResultTask<bool>> Add(Book book)
         {
-            _libraryDB = libraryDB;
+            try
+            {
+                await libraryDb.Books.AddAsync(book);
+                await libraryDb.SaveChangesAsync();
+
+                return ResultTask<bool>.Success(true);
+            }
+            catch (Exception ex)
+            {
+                return ResultTask<bool>.Failure(ex.Message);
+            }
         }
 
-        public async Task Add(Book book)
+        public async Task<ResultTask<bool>> Remove(Book book)
         {
-            await _libraryDB.Books.AddAsync(book);
-            await _libraryDB.SaveChangesAsync();
+            try
+            {
+                libraryDb.Books.Remove(book);
+                await libraryDb.SaveChangesAsync();
+                return ResultTask<bool>.Success(true);
+            }
+            catch (Exception ex)
+            {
+                return ResultTask<bool>.Failure(ex.Message);
+            }
         }
 
-        public async Task Remove(Book book)
+        public async Task<ResultTask<List<Book>>> GetAll(string userId)
         {
-            _libraryDB.Books.Remove(book);
-            await _libraryDB.SaveChangesAsync();
+            try
+            {
+                var bookList = await libraryDb.Books
+                    .Where(u => u.UserId == userId)
+                    .ToListAsync();
+
+                return ResultTask<List<Book>>.Success(data: bookList);
+            }
+            catch (Exception ex)
+            {
+                return ResultTask<List<Book>>.Failure(ex.Message);
+            }
         }
 
-        public async Task<List<Book>> GetAll(int? userId)
+        public async Task<ResultTask<Book>> GetBookByTitle(string title, string userId)
         {
-            var bookList = await _libraryDB.Transactions
-                                    .Where(u => u.UserId == userId)
-                                    .Select(b => b.Book)
-                                    .ToListAsync();
+            try
+            {
+                var book = await libraryDb.Books
+                    .Where(b => b.Title == title && b.UserId == userId)
+                    .FirstOrDefaultAsync();
 
-            return bookList;
+                return book != null ? ResultTask<Book>.Success(data: book) : ResultTask<Book>.Failure("Something wrong");
+            }
+            catch (Exception ex)
+            {
+                return ResultTask<Book>.Failure(ex.Message);
+            }
         }
 
-        public async Task<Book> SearchByTitle(string title, int? userId)
+        public async Task<ResultTask<bool>> ExistValidation(BookViewModel book, string userId)
         {
-            var book = await _libraryDB.Transactions
-                                        .Where(b => b.Book.Title == title && b.UserId == userId)
-                                        .Select(b => b.Book)
-                                        .FirstOrDefaultAsync();
-            return book;
+            try
+            {
+                await libraryDb.Books
+                    .Where(b => b.Title == book.Title && b.Author == book.Author && b.UserId == userId)
+                    .AnyAsync();
+
+                return ResultTask<bool>.Success(true);
+            }
+            catch (Exception ex)
+            {
+                return ResultTask<bool>.Failure(ex.Message);
+            }
         }
 
-        public async Task<bool> ExistValidation(Book book, int? userId)
+        public async Task<ResultTask<Book>> SearchBookByTitle(string title, string userId)
         {
-            return await _libraryDB.Transactions
-                                   .Where(b => b.Book.Title == book.Title && b.Book.Author == book.Author && b.UserId == userId)
-                                   .AnyAsync();
+            try
+            {
+                var book = await libraryDb.Books.FirstOrDefaultAsync(b => b.Title == title && b.UserId == userId);
+                if (book != null) return ResultTask<Book>.Success(book);
+                return ResultTask<Book>.Failure("Book is null");
+            }
+            catch (Exception ex)
+            {
+                return ResultTask<Book>.Failure(ex.Message);
+            }
         }
 
-        public async Task<int> GetBookIdByTitle(string title)
+        public async Task<ResultTask<bool>> Delete(string userId, string title)
         {
-            return await _libraryDB.Books
-                                   .Where(b => b.Title == title)
-                                   .Select(b => b.Id)
-                                   .FirstOrDefaultAsync();
-        }
-
-        public async Task AddTransaction(Transaction tx)
-        {
-            await _libraryDB.Transactions.AddAsync(tx);
-            await _libraryDB.SaveChangesAsync();
+            try
+            {
+                var book = await libraryDb.Books.FirstOrDefaultAsync(b => b.Title == title && b.UserId == userId);
+                if (book != null) libraryDb.Books.Remove(book);
+                await libraryDb.SaveChangesAsync();
+                return ResultTask<bool>.Success(true);
+            }
+            catch (Exception ex)
+            {
+                return ResultTask<bool>.Failure(ex.Message);
+            }
         }
     }
 }

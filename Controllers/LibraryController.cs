@@ -1,173 +1,149 @@
-﻿using LibraryAppMVC.Interfaces;
+﻿using System.Security.Claims;
+using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAppMVC.Controllers
 {
-    public class LibraryController : Controller
+    public class LibraryController(IBookService bookService) : Controller
     {
-        private readonly IBookService _bookService;
-        public LibraryController(IBookService bookService)
-        {
-            _bookService = bookService;
-        }
+        //================================ Account Section ================================//
 
-        [Route("library/home")]
+        //------- Home Section -------//
+        [Route(template: "library/home"), HttpGet]
         public IActionResult Home()
         {
             return View();
         }
 
-        [Route("library/Add")]
-        [HttpGet]
+        //------- Add Section -------//
+        [Route(template: "library/Add"), HttpGet]
         public IActionResult Add()
         {
             return View();
         }
-
-        [Route("library/Add")]
-        [HttpPost]
+        [Route(template: "library/Add"), HttpPost]
         public async Task<IActionResult> Add(BookViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            // Get current userId
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
-                var userId = HttpContext.Session.GetInt32("UserId");
-
-                if (userId == null)
-                {
-                    TempData["ErrorMessage"] = "User not logged in!";
-                    return RedirectToAction("Login", "Account");
-                }
-
-                try
-                {
-                    await _bookService.Add(userId, model);
-
-                    TempData["SuccessMessage"] = "Book added successfully!";
-                    return RedirectToAction("Add");
-                }
-                catch (Exception ex)
-                {
-                    TempData["ErrorMessage"] = ex.Message;
-                }
+                TempData["ErrorMessage"] = "User not logged in!";
+                return RedirectToAction("Login", controllerName: "Account");
             }
 
+            // Add operation
+            var result = await bookService.Add(model, userId);
+
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Book added successfully!";
+                return RedirectToAction("Home");
+            }
+
+            ModelState.AddModelError(string.Empty, errorMessage: result.ErrorMessage ?? "Add failed");
             return View(model);
         }
 
-        [Route("library/remove")]
-        [HttpPost]
-        public async Task<IActionResult> Remove(string title)
+        //------- Remove Section -------//
+        [Route(template: "library/remove"), HttpPost]
+        public async Task<IActionResult> Remove(BookViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View();
-            }
-
-            var userId = HttpContext.Session.GetInt32("UserId");
+            // Get current userId
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "User not logged in!";
                 return RedirectToAction("Login", "Account");
             }
 
-            var book =await _bookService.SearchByTitle(title, userId);
-
-            if (book == null)
+            var result = await bookService.Remove(model, userId);
+            if (!result.Succeeded)
             {
-                TempData["ErrorMessage"] = "This book is not exist";
+                TempData["ErrorMessage"] = result.ErrorMessage;
                 return RedirectToAction("List");
             }
-            await _bookService.Remove(book);
+
             TempData["RemoveMessage"] = "Book Removed!";
             return RedirectToAction("List");
-
         }
 
-        [Route("library/list")]
-        [HttpGet]
+        //------- List Section -------//
+        [Route(template: "library/list"), HttpGet]
         public async Task<IActionResult> List()
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "User not logged in!";
-                return RedirectToAction("Login", "Account");
-            };
+                return RedirectToAction("Login", controllerName: "Account");
+            }
 
-            var books = await _bookService.GetAll(userId);
+            var result = await bookService.GetAll(userId);
+            if (result.Succeeded)
+                return View(result.Data);
 
-            var createModel = new List<CompositeViewModel>();
-            foreach (var book in books)
-            {
-                var listBookViewModel = new ListBookViewModel
-                {
-                    Title = book.Title,
-                    Author = book.Author,
-                    Genre = (ListBookViewModel.GenreType)book.Genre,
-                    BookDetails = new BookViewModel
-                    {
-                        Title = book.Title,
-                        Author = book.Author,
-                        Genre = book.Genre
-                    }
-                };
-
-                var createCompositeViewModel = new CompositeViewModel()
-                {
-                    listBooks = listBookViewModel,
-                    bookDetails = listBookViewModel.BookDetails
-                };
-
-                createModel.Add(createCompositeViewModel);
-            };
-
-            return View(createModel);
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
+            return View();
         }
 
-        [HttpGet]
-        [Route("Library/Search")]
+        //------- Search Section -------//
+        [HttpGet, Route(template: "Library/Search")]
         public IActionResult Search()
         {
             return View();
         }
-
-        [Route("library/SearchByTitle")]
-        [HttpPost]
+        [Route(template: "library/SearchByTitle"), HttpPost]
         public async Task<IActionResult> SearchByTitle(string title)
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {
                 TempData["ErrorMessage"] = "User not logged in!";
                 return RedirectToAction("Login", "Account");
-            };
+            }
 
-            var book = await _bookService.SearchByTitle(title, userId);
-            if (book == null)
+            var result = await bookService.SearchByTitle(title, userId);
+            if (!result.Succeeded)
             {
                 TempData["ErrorMessage"] = "This book is not exist";
                 return RedirectToAction("Search");
             }
 
-            var bookModel = new BookViewModel()
-            {
-                Title = book.Title,
-                Author = book.Author,
-                Genre = book.Genre
-            };
-
-            return RedirectToAction("BookDetails", bookModel);
+            return RedirectToAction("BookDetails", result.Data);
         }
 
-        [HttpPost]
-        [HttpGet]
-        [Route("Library/BookDetails")]
+        //------- Delete Section -------//
+        [Route(template: "Library/Delete/{title}"), HttpPost]
+        public async Task<IActionResult> Delete(string title)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                TempData["ErrorMessage"] = "User not logged in";
+                return RedirectToAction(actionName: "login", controllerName: "Account");
+            }
+
+            var result = await bookService.Delete(userId, title);
+            if (!result.Succeeded)
+            {
+                TempData["ErrorMessage"] = "Can not delete your book";
+                return RedirectToAction("Search");
+            }
+
+            TempData["Successfully"] = "Your book deleted";
+            return RedirectToAction("Search");
+
+        }
+
+        //------- Details Section -------//
+        [HttpGet, Route(template: "Library/BookDetails")]
         public IActionResult BookDetails(BookViewModel book)
         {
-            ViewBag.Referer = Request.Headers["Referer"].ToString();
             return View(book);
         }
-
     }
 }

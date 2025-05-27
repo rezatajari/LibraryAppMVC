@@ -1,5 +1,4 @@
 ﻿@model LibraryAppMVC.ViewModels.RegisterViewModel
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,9 +17,11 @@
                     @TempData["ErrorMessage"]
                 </div>
             }
-
+            
+ 
             <form asp-action="Register" method="post">
                 <div>
+                    <div asp-validation-summary="All" class="text-danger"></div>
                     <label for="UserName">Username:</label>
                     <input asp-for="UserName" id="UserName" class="form-control" placeholder="Enter your username" required />
                     <span asp-validation-for="UserName" style="color: red;"></span>
@@ -55,8 +56,9 @@
                 </div>
             </form>
 
-            <p>Already have an account? <a href="/Account/Login">Login here</a>.</p>
-            <a class="btn btn-primary" href="/Home/Index">Home</a>
+            <p>Already have an account? <a asp-controller="Account" asp-action="Login">Login here</a>.</p>
+            
+            <a class="btn btn-primary" asp-controller="Home" asp-action="index">Home</a>
         </div>
     </div>
 </body>

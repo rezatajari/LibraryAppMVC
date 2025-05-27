@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Email Confirmation Success";
+}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h2 {
+        color: #4caf50;
+    }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #007bff;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<h2>Email Confirmed Successfully</h2>
+<p>Your email has been successfully confirmed! You can now log in and start using the application.</p>
+
+<a href="@Url.Action("Login", "Account")" class="btn btn-primary">Go to Log in</a>

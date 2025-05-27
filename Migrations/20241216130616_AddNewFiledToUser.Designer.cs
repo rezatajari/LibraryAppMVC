@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LibraryAppMVC.Migrations
 {
-    [DbContext(typeof(LibraryDB))]
+    [DbContext(typeof(LibraryDb))]
     [Migration("20241216130616_AddNewFiledToUser")]
     partial class AddNewFiledToUser
     {

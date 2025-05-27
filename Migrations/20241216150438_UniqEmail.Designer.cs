@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LibraryAppMVC.Migrations
 {
-    [DbContext(typeof(LibraryDB))]
+    [DbContext(typeof(LibraryDb))]
     [Migration("20241216150438_UniqEmail")]
     partial class UniqEmail
     {

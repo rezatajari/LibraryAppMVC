@@ -1,158 +1,151 @@
-﻿using LibraryAppMVC.Interfaces;
+﻿using System.Security.Claims;
+using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAppMVC.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController(
+        IAccountService accountService,
+        ILogger<AccountController> logger)
+        : Controller
     {
+        //================================ Account Section ================================//
 
-        private readonly IAccountService _accountService;
-        public AccountController(IAccountService accountService)
-        {
-            _accountService = accountService;
-        }
-
-        [HttpGet]
-        [Route("Account/Login")]
+        //------- Login Section -------//
+        [HttpGet, Route(template: "Account/Login")]
         public IActionResult Login()
         {
             return View();
         }
-
-        [HttpPost]
-        [Route("Account/Login")]
+        [HttpPost, Route(template: "Account/Login")]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            var result = await accountService.LogIn(model);
+            if (!result.Succeeded)
             {
-                var user = await _accountService.Login(model);
-
-                if (user != null)
-                {
-                    HttpContext.Session.SetInt32("UserId", user.Id);
-                    TempData["SuccessMessage"] = "Login successful!";
-
-                    return RedirectToAction("Profile");
-                }
-
-                TempData["ErrorMessage"] = "Invalid login credentials. Please try again.";
+                ModelState.AddModelError(key: string.Empty, result.ErrorMessage ?? "Log in failed");
+                logger.LogError("{Email} at {Time} has {Error}", model.Email, DateTime.UtcNow, result.ErrorMessage);
                 return View(model);
             }
 
-            return View(model);
+            logger.LogInformation("{Email} logged in successfully at {Time}.", model.Email, DateTime.UtcNow);
+            return RedirectToAction("Profile");
         }
 
-        [HttpGet]
-        [Route("Account/Register")]
+        //------- Register Section -------//
+        [HttpGet, Route(template: "Account/Register")]
         public ActionResult Register()
         {
             return View();
         }
-
-        [HttpPost]
-        [Route("Account/Register")]
+        [HttpPost, Route(template: "Account/Register")]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
-            {
-                bool userExist = await _accountService.CheckUserExist(model.Email);
-                if (userExist)
-                {
-                    TempData["ErrorMessage"] = "A user with this email already exists.";
-                    return View(model);
-                }
+            if (!ModelState.IsValid) return View(model);
 
-                await _accountService.Register(model);
-                TempData["SuccessMessage"] = "Registration successful! You can now log in.";
-                return RedirectToAction("Login");
+            var result = await accountService.Registration(model);
+
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Registration is failed");
+                return View(model);
             }
 
-            return View(model);
-
+            TempData["Registered"] = "Registration successful! A confirmation email has been sent to your email address." +
+                " Please confirm your email to activate your account.";
+            return RedirectToAction("Login");
         }
 
-        [HttpGet]
-        [Route("Account/Profile")]
-        public async Task<IActionResult> Profile()
+        //------- Confirmation Email Section -------//
+        [HttpGet, Route(template: "Account/ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
+            var result = await accountService.ConfirmationEmailProcess(userId, token);
 
-            var user =await _accountService.GetUserById(userId);
-
-            var profileModel = new ProfileViewModel
-            {
-                Email = user.Email,
-                UserName = user.UserName,
-                ExistProfilePicture = user.ProfilePicturePath
-            };
-
-            return View(profileModel);
+            return !result.Succeeded ? RedirectToAction(actionName: "Error", controllerName: "Home") :
+                RedirectToAction("ConfirmEmailSuccess");
         }
-
         [HttpGet]
-        [Route("Account/EditProfile")]
-        public async Task<IActionResult> EditProfile()
+        public IActionResult ConfirmEmailSuccess()
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
-
-            var user = await _accountService.GetUserById(userId);
-
-            var profileModel = new ProfileViewModel
-            {
-                Email = user.Email,
-                UserName = user.UserName,
-                ExistProfilePicture = user.ProfilePicturePath
-            };
-
-            return View(profileModel);
+            return View();
         }
 
+        //------- Delete Account Section -------//
+        [HttpGet, Route(template: "Account/DeleteAccount/{email}")]
+        public async Task<IActionResult> DeleteAccount(string email)
+        {
+            var result = await accountService.DeleteAccount(email);
 
-        [HttpPost]
-        [Route("Account/EditProfile")]
+            if (result.Succeeded) return RedirectToAction("AccountDeleted");
+
+            TempData["ErrorMessage"] = "Failed to deleted your account";
+            return RedirectToAction(actionName: "Error", controllerName: "Home");
+        }
+        [HttpGet]
+        public IActionResult AccountDeleted()
+        {
+            return View();
+        }
+
+        //------- Logout Section -------//
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        //================================ Profile Section ================================//
+
+        //------- Profile Page Section -------//
+        [HttpGet, Route(template: "Account/Profile")]
+        public async Task<IActionResult> Profile(string email)
+        {
+            var result = await accountService.GetUserByEmail(email);
+
+            if (result.Succeeded)
+                return View(result.Data);
+
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
+            return View();
+        }
+        [HttpGet, Route(template: "Account/EditProfile")]
+
+        //------- Edit Profile Section -------//
+        [HttpGet]
+        public async Task<IActionResult> EditProfile(string email)
+        {
+            var result = await accountService.GetUserByEmail(email);
+
+            if (result.Succeeded)
+                return View(result.Data);
+
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
+            return View();
+        }
+        [HttpPost, Route(template: "Account/EditProfile")]
         public async Task<IActionResult> EditProfile(ProfileViewModel model)
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
-
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null)
             {
-                var emailExists = await _accountService.EmailEditExist(userId, model.Email);
-
-                if (emailExists)
-                {
-                    ModelState.AddModelError("Email", "This email address is already in use.");
-                    return View(model);
-                }
-
-                await _accountService.EditProfileUser(userId, model);
-
-                TempData["SuccessMessage"] = "Profile updated successfully!";
-                return RedirectToAction("Profile");
+                ModelState.AddModelError(string.Empty, "User is not exist");
+                return View(model);
             }
 
-            return View(model);
-        }
-
-
-        [HttpGet]
-        [Route("Account/DeleteAccount")]
-        public async Task<IActionResult> DeleteAccount()
-        {
-            var userId = HttpContext.Session.GetInt32("UserId");
-
-            var result = await _accountService.RemoveUser(userId);
-
-            if (result)
+            var result = await accountService.EditProfileUser(model, currentUserId);
+            if (!result.Succeeded)
             {
-
-                TempData["SuccessMessage"] = "Profile Deleted";
-                return RedirectToAction("Index", "Home");
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
+                return View(model);
             }
 
-            TempData["ErrorMessage"] = "Somethings wronge!!";
+            TempData["SuccessMessage"] = "Profile updated successfully!";
             return RedirectToAction("Profile");
         }
-
     }
 }

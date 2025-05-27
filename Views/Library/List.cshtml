@@ -1,7 +1,7 @@
-﻿@model IEnumerable<LibraryAppMVC.ViewModels.CompositeViewModel>
+﻿@model LibraryAppMVC.ViewModels.ListBookViewModel
 
 @{
-    ViewData["Title"] = "Book List";
+    ViewData["Title"] = "List of books";
 }
 <style>
     table {
@@ -52,50 +52,37 @@
     </div>
 }
 
-<!-- Table for Listing Books -->
-<table style="width: 100%; border-collapse: collapse; text-align: left;">
-    <thead>
-        <tr>
-            <th style="border-bottom: 2px solid #ddd; padding: 8px;">Title</th>
-            <th style="border-bottom: 2px solid #ddd; padding: 8px;">Author</th>
-            <th style="border-bottom: 2px solid #ddd; padding: 8px;">Genre</th>
-            <th style="border-bottom: 2px solid #ddd; padding: 8px;">Details</th>
-            <th style="border-bottom: 2px solid #ddd; padding: 8px;">Remove</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
-        {
-            foreach (var book in Model)
+<h2>List of books</h2>
+
+@if (Model.BookListViewMode != null && Model.BookListViewMode.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in Model.BookListViewMode)
             {
                 <tr>
-                    <td style="border-bottom: 1px solid #ddd; padding: 8px;">@book.listBooks.Title</td>
-                    <td style="border-bottom: 1px solid #ddd; padding: 8px;">@book.listBooks.Author</td>
-                    <td style="border-bottom: 1px solid #ddd; padding: 8px;">@book.listBooks.Genre</td>
-                    <td style="border-bottom: 1px solid #ddd; padding: 8px;">
-                        <form asp-action="BookDetails" asp-controller="Library" method="post">
-                            <input type="hidden" name="Title" value="@book.bookDetails.Title" />
-                            <input type="hidden" name="Author" value="@book.bookDetails.Author" />
-                            <input type="hidden" name="Genre" value="@book.bookDetails.Genre" />
-                            <button type="submit" class="btn btn-danger btn-block">Book Details</button>
-                        </form>
-                    </td>
-                    <td style="border-bottom: 1px solid #ddd; padding: 8px;">
-                        <form asp-action="Remove" asp-controller="Library" method="post">
-                            <input type="hidden" name="Title" value="@book.listBooks.Title" />
-                            <button type="submit" class="btn btn-danger btn-block">Remove Book</button>
-                        </form>
+                    <td>@book.Title</td>
+                    <td>@book.Author</td>
+                    <td>@book.Genre</td>
+                    <td>
+                        <a asp-action="Delete" asp-route-id="@book.Title" class="btn btn-sm btn-danger">Delete</a>
                     </td>
                 </tr>
             }
-        }
-        else
-        {
-            <tr>
-                <td colspan="4" style="padding: 8px; text-align: center;">No books found.</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<a href="@Url.Action("Home")" class="btn btn-primary btn-block">Home Library</a>
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        No books found in your library.
+    </div>
+}

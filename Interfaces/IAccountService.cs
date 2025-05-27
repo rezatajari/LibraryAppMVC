@@ -1,16 +1,19 @@
-﻿using LibraryAppMVC.Models;
+﻿using LibraryAppMVC.Utilities;
 using LibraryAppMVC.ViewModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace LibraryAppMVC.Interfaces
 {
     public interface IAccountService
     {
-        Task<User> Login(LoginViewModel model);
-        Task<bool> CheckUserExist(string email);
-        Task<bool> Register(RegisterViewModel model);
-        Task<User> GetUserById(int? id);
-        Task EditProfileUser(int? userId, ProfileViewModel model);
-        Task<bool> EmailEditExist(int? userId, string email);
-        Task<bool> RemoveUser(int? userId);
+        //------------------ Account Services ------------------//
+        Task<ResultTask<SignInResult>> LogIn(LoginViewModel model);
+        Task<ResultTask<bool>> Registration(RegisterViewModel model);
+        Task<ResultTask<bool>> ConfirmationEmailProcess(string userId, string token);
+        Task<ResultTask<bool>> DeleteAccount(string email);
+
+        //------------------ Profile Services ------------------//
+        Task<ResultTask<ProfileViewModel>> GetUserByEmail(string email);
+        Task<ResultTask<bool>> EditProfileUser(ProfileViewModel model,string userId);
     }
 }
