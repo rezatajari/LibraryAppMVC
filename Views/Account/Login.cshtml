@@ -102,7 +102,7 @@
                 </div>
             }
 
-            <form asp-action="Login" method="post">
+            <form asp-controller="Account" asp-action="Login" method="post">
                 <div class="mb-3">
                     <label for="Email" class="form-label">Email Address</label>
                     <input asp-for="Email" id="Email" class="form-control" placeholder="Enter your email" required>

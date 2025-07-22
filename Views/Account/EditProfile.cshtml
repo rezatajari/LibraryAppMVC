@@ -1,36 +1,113 @@
 ﻿@model LibraryAppMVC.ViewModels.ProfileViewModel
-
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div style="color:green">
-        @TempData["SuccessMessage"]
-    </div>
+@{
+    ViewData["Title"] = "Edit Profile";
+    Layout = "_UserLayout";
 }
-<form asp-action="EditProfile" asp-controller="Account" method="post" enctype="multipart/form-data">
-    <div class="form-group">
-        <label asp-for="UserName" class="control-label"></label>
-        <input asp-for="UserName" class="form-control" />
-        <span asp-validation-for="UserName" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Email" class="control-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="ProfilePicture" class="control-label"></label>
-        <input asp-for="ProfilePicture" type="file" class="form-control" />
-        <span asp-validation-for="ProfilePicture" class="text-danger"></span>
-    </div>
-    @if (Model.ExistProfilePicture != null)
+
+<div class="container-fluid">
+    <!-- Alerts -->
+    @if (TempData["SuccessMessage"] != null)
     {
-        <div class="form-group">
-            <img src="@Model.ExistProfilePicture" alt="Profile Picture" width="150" height="150" />
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
-    <button type="submit" class="btn btn-primary">Save</button>
-</form>
-<div class="col-md-3">
-    <a href="@Url.Action("Profile", "Account")" class="btn btn-info btn-block">Profile</a>
+
+    <div class="profile-card">
+        <h2 class="mb-4">Edit Profile</h2>
+
+        <form asp-action="EditProfile" asp-controller="Account" method="post" enctype="multipart/form-data" class="row g-3">
+            <!-- Profile Picture Section -->
+            <div class="col-md-4">
+                <div class="text-center mb-4">
+                    @if (Model.ExistProfilePicture != null)
+                    {
+                        <img src="@Model.ExistProfilePicture" alt="Current Profile Picture"
+                             class="profile-picture mb-3" id="profileImagePreview" />
+                    }
+                    else
+                    {
+                        <div class="profile-picture mb-3 bg-secondary d-flex align-items-center justify-content-center"
+                             id="profileImagePreview">
+                            <i class="bi bi-person-fill text-white" style="font-size: 3rem;"></i>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label asp-for="ProfilePicture" class="form-label">Change Profile Picture</label>
+                        <input asp-for="ProfilePicture" type="file" class="form-control"
+                               accept="image/*" id="profileImageInput" />
+                        <span asp-validation-for="ProfilePicture" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Details Section -->
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label">Username</label>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email Address</label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional fields can be added here -->
+                @if (Model.BirthdayDate != null)
+                {
+                    <div class="mb-3">
+                        <label asp-for="BirthdayDate" class="form-label">Birthday</label>
+                        <input asp-for="BirthdayDate" type="date" class="form-control" />
+                        <span asp-validation-for="BirthdayDate" class="text-danger small"></span>
+                    </div>
+                }
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                    <a asp-controller="Profile" asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Profile
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Preview profile picture before upload
+        document.getElementById('profileImageInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('profileImagePreview');
+                    if (preview.tagName === 'IMG') {
+                        preview.src = e.target.result;
+                    } else {
+                        // Replace the placeholder div with an image
+                        const newImg = document.createElement('img');
+                        newImg.src = e.target.result;
+                        newImg.className = 'profile-picture mb-3';
+                        newImg.id = 'profileImagePreview';
+                        preview.parentNode.replaceChild(newImg, preview);
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}

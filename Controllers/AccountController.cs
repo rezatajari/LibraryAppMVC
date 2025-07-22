@@ -20,7 +20,7 @@ namespace LibraryAppMVC.Controllers
             return View();
         }
         [HttpPost(template: "[action]")]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login( LoginViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
 
@@ -33,7 +33,7 @@ namespace LibraryAppMVC.Controllers
             }
 
             logger.LogInformation("{Email} logged in successfully at {Time}.", model.Email, DateTime.UtcNow);
-            return RedirectToAction("Profile");
+            return RedirectToAction("Profile",new {email=model.Email});
         }
 
         //------- Register Section -------//
@@ -105,6 +105,7 @@ namespace LibraryAppMVC.Controllers
         [HttpGet(template: "[action]")]
         public async Task<IActionResult> Profile(string email)
         {
+            if (!ModelState.IsValid) return Redirect("Login");
             var result = await accountService.GetUserByEmail(email);
 
             if (result.Succeeded)
