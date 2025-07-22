@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAppMVC.Controllers
 {
+    [Route(template:"[controller]")]
     public class AccountController(
         IAccountService accountService,
         ILogger<AccountController> logger)
@@ -13,12 +14,12 @@ namespace LibraryAppMVC.Controllers
         //================================ Account Section ================================//
 
         //------- Login Section -------//
-        [HttpGet, Route(template: "Account/Login")]
+        [HttpGet(template: "[action]")]
         public IActionResult Login()
         {
             return View();
         }
-        [HttpPost, Route(template: "Account/Login")]
+        [HttpPost(template: "[action]")]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -36,12 +37,12 @@ namespace LibraryAppMVC.Controllers
         }
 
         //------- Register Section -------//
-        [HttpGet, Route(template: "Account/Register")]
+        [HttpGet(template: "[action]")]
         public ActionResult Register()
         {
             return View();
         }
-        [HttpPost, Route(template: "Account/Register")]
+        [HttpPost(template: "[action]")]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -60,7 +61,7 @@ namespace LibraryAppMVC.Controllers
         }
 
         //------- Confirmation Email Section -------//
-        [HttpGet, Route(template: "Account/ConfirmEmail")]
+        [HttpGet(template: "[action]")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
             var result = await accountService.ConfirmationEmailProcess(userId, token);
@@ -75,7 +76,7 @@ namespace LibraryAppMVC.Controllers
         }
 
         //------- Delete Account Section -------//
-        [HttpGet, Route(template: "Account/DeleteAccount/{email}")]
+        [HttpGet(template: "[action]/{email}")]
         public async Task<IActionResult> DeleteAccount(string email)
         {
             var result = await accountService.DeleteAccount(email);
@@ -101,7 +102,7 @@ namespace LibraryAppMVC.Controllers
         //================================ Profile Section ================================//
 
         //------- Profile Page Section -------//
-        [HttpGet, Route(template: "Account/Profile")]
+        [HttpGet(template: "[action]")]
         public async Task<IActionResult> Profile(string email)
         {
             var result = await accountService.GetUserByEmail(email);
@@ -112,10 +113,9 @@ namespace LibraryAppMVC.Controllers
             ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
             return View();
         }
-        [HttpGet, Route(template: "Account/EditProfile")]
 
         //------- Edit Profile Section -------//
-        [HttpGet]
+        [HttpGet(template: "[action]")]
         public async Task<IActionResult> EditProfile(string email)
         {
             var result = await accountService.GetUserByEmail(email);
@@ -126,7 +126,7 @@ namespace LibraryAppMVC.Controllers
             ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
             return View();
         }
-        [HttpPost, Route(template: "Account/EditProfile")]
+        [HttpPost(template: "[action]")]
         public async Task<IActionResult> EditProfile(ProfileViewModel model)
         {
             if (!ModelState.IsValid) return View(model);

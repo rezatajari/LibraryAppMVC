@@ -10,19 +10,19 @@ namespace LibraryAppMVC.Controllers
         //================================ Account Section ================================//
 
         //------- Home Section -------//
-        [Route(template: "library/home"), HttpGet]
+        [HttpGet(template: "library/home")]
         public IActionResult Home()
         {
             return View();
         }
 
         //------- Add Section -------//
-        [Route(template: "library/Add"), HttpGet]
+        [HttpGet(template: "library/Add") ]
         public IActionResult Add()
         {
             return View();
         }
-        [Route(template: "library/Add"), HttpPost]
+        [HttpPost(template: "library/Add") ]
         public async Task<IActionResult> Add(BookViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -49,7 +49,7 @@ namespace LibraryAppMVC.Controllers
         }
 
         //------- Remove Section -------//
-        [Route(template: "library/remove"), HttpPost]
+        [HttpPost(template: "library/remove")]
         public async Task<IActionResult> Remove(BookViewModel model)
         {
             // Get current userId
@@ -72,7 +72,7 @@ namespace LibraryAppMVC.Controllers
         }
 
         //------- List Section -------//
-        [Route(template: "library/list"), HttpGet]
+        [HttpGet(template: "library/list")]
         public async Task<IActionResult> List()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -96,7 +96,7 @@ namespace LibraryAppMVC.Controllers
         {
             return View();
         }
-        [Route(template: "library/SearchByTitle"), HttpPost]
+        [HttpPost(template: "library/SearchByTitle")]
         public async Task<IActionResult> SearchByTitle(string title)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -117,7 +117,7 @@ namespace LibraryAppMVC.Controllers
         }
 
         //------- Delete Section -------//
-        [Route(template: "Library/Delete/{title}"), HttpPost]
+        [HttpPost(template: "Library/Delete/{title}")]
         public async Task<IActionResult> Delete(string title)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -140,7 +140,7 @@ namespace LibraryAppMVC.Controllers
         }
 
         //------- Details Section -------//
-        [HttpGet, Route(template: "Library/BookDetails")]
+        [HttpGet(template: "Library/BookDetails")]
         public IActionResult BookDetails(BookViewModel book)
         {
             return View(book);

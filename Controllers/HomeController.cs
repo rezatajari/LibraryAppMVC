@@ -7,12 +7,13 @@ namespace LibraryAppMVC.Controllers
 {
     public class HomeController : Controller
     {
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
-        [HttpGet, Route(template: "Home/Error")]
+        [HttpGet(template: "Home/Error")]
         public IActionResult Error()
         {
             var exception = HttpContext.Features.Get<IExceptionHandlerFeature>();

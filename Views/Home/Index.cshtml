@@ -4,65 +4,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Personal Library</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom styles -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
-
-        header {
-            background: #333;
-            color: #fff;
-            padding: 1rem 0;
-            text-align: center;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 0 15px;
-        }
-
-        .login-button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007BFF;
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
             color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
+            padding: 5rem 0;
+            margin-bottom: 2rem;
         }
-
-            .login-button:hover {
-                background-color: #0056b3;
-            }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #0d6efd;
+        }
+        
+        .btn-custom {
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
+    <!-- Success Message Alert -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div style="color: red;">
+        <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
             @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
-    <header>
-        <h1>Welcome to Your Personal Library</h1>
+
+    <!-- Hero Section -->
+    <header class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">Welcome to Your Personal Library</h1>
+            <p class="lead mb-4">Organize, manage, and enjoy your book collection with ease</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-4 gap-3 btn-custom">Login</a>
+                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg px-4 btn-custom">Register</a>
+            </div>
+        </div>
     </header>
-    <div class="container">
-        <p>
-            Your personal library system helps you manage your book collection with ease.
-            You can:
-        </p>
-        <ul>
-            <li>Add and organize your favorite books.</li>
-        </ul>
-        <p>
-            Ready to explore your library? Log in to get started!
-        </p>
-        <a asp-controller="Account" asp-action="Login" class="login-button">Login</a>
-        <a asp-controller="Account" asp-action="Register" class="login-button">Register</a>
+
+    <!-- Features Section -->
+    <div class="container py-5">
+        <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+            <div class="col d-flex align-items-start">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <h3 class="fs-2">Manage Books</h3>
+                    <p>Add and organize your favorite books in a digital catalog.</p>
+                </div>
+            </div>
+            <div class="col d-flex align-items-start">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <h3 class="fs-2">Easy Search</h3>
+                    <p>Quickly find any book in your collection with powerful search.</p>
+                </div>
+            </div>
+            <div class="col d-flex align-items-start">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-phone"></i>
+                    </div>
+                    <h3 class="fs-2">Mobile Friendly</h3>
+                    <p>Access your library from any device, anywhere.</p>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Call to Action -->
+    <div class="bg-light py-5">
+        <div class="container text-center py-5">
+            <h2 class="display-6 mb-4">Ready to explore your library?</h2>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-4 gap-3 btn-custom">Login Now</a>
+                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary btn-lg px-4 btn-custom">Create Account</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </body>
 </html>
