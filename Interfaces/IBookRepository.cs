@@ -13,5 +13,7 @@ namespace LibraryAppMVC.Interfaces
         Task<ResultTask<bool>> ExistValidation(BookViewModel book, string userId);
         Task<ResultTask<Book>> SearchBookByTitle(string title, string userId);
         Task<ResultTask<bool>> Delete(string userId, string title);
+        Task<Book> GetById(int id);
+        Task<bool> Update(Book book);
     }
 }

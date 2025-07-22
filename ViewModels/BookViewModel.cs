@@ -5,6 +5,7 @@ namespace LibraryAppMVC.ViewModels
 {
     public class BookViewModel
     {
+        public int Id { get; set; }
         [Required]
         [StringLength(100, ErrorMessage = "Title cannot be longer than 100 characters.")]
         public required string? Title { get; set; }

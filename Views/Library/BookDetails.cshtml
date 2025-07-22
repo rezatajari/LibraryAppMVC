@@ -1,43 +1,101 @@
 ﻿@model LibraryAppMVC.ViewModels.BookViewModel
-
 @{
-    ViewData["Title"] = "Book Details"; var refererUrl = ViewBag.Referer as string;
+    ViewData["Title"] = "Book Details";
+    Layout = "_UserLayout";
+    var refererUrl = ViewBag.Referer as string;
 }
-<head>
-    
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+        <div>
+            @if (!string.IsNullOrEmpty(refererUrl))
+            {
+                <a href="@refererUrl" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            }
+            <a href="@Url.Action("Home", "Library")" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm ms-2">
+                <i class="bi bi-house"></i> Library Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Book Details Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 font-weight-bold">@Model.Title</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <tbody>
+                                <tr>
+                                    <th width="30%">Title</th>
+                                    <td>@Model.Title</td>
+                                </tr>
+                                <tr>
+                                    <th>Author</th>
+                                    <td>@Model.Author</td>
+                                </tr>
+                                <tr>
+                                    <th>Genre</th>
+                                    <td>@Model.Genre</td>
+                                </tr>
+                                <!-- Additional fields can be added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="book-cover-placeholder bg-light p-4 rounded">
+                        <i class="bi bi-book text-muted" style="font-size: 5rem;"></i>
+                        <p class="mt-2">Book Cover</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                @if (!string.IsNullOrEmpty(refererUrl))
+                {
+                    <a href="@refererUrl" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                }
+                <a href="@Url.Action("Home", "Library")" class="btn btn-primary ms-2">
+                    <i class="bi bi-house"></i> Library Home
+                </a>
+                <a href="@Url.Action("Edit", "Library", new { id = Model.Id })" class="btn btn-warning ms-2">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+                <a href="@Url.Action("Delete", "Library", new { id = Model.Id })" class="btn btn-danger ms-2">
+                    <i class="bi bi-trash"></i> Delete
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
     <style>
-        .book-details-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
+        .book-cover-placeholder {
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #dee2e6;
         }
 
-            .book-details-container h2 {
-                margin-bottom: 20px;
-            }
+        .card-header.bg-primary {
+            border-radius: 10px 10px 0 0 !important;
+        }
 
-            .book-details-container p {
-                margin: 10px 0;
-            }
-
-            .book-details-container label {
-                font-weight: bold;
-            }
+        th {
+            background-color: #f8f9fa;
+        }
     </style>
-</head>
-<body>
-    <div class="book-details-container">
-        <h2>Book Details</h2>
-        <p><label>Title:</label> @Model.Title</p>
-        <p><label>Author:</label> @Model.Author</p>
-        <p><label>Genre:</label> @Model.Genre</p>
-    </div>
-    @if (!string.IsNullOrEmpty(refererUrl))
-    {
-        <a href="@refererUrl" class="btn btn-secondary">Back</a>
-    }
-    <a href="@Url.Action("Home")" class="btn btn-primary">Home Library</a>
-</body>
+}

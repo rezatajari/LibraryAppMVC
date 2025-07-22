@@ -1,4 +1,5 @@
-﻿using LibraryAppMVC.Data;
+﻿using System.Runtime.CompilerServices;
+using LibraryAppMVC.Data;
 using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
 using Microsoft.EntityFrameworkCore;
@@ -112,6 +113,26 @@ namespace LibraryAppMVC.Repositories
             catch (Exception ex)
             {
                 return ResultTask<bool>.Failure(ex.Message);
+            }
+        }
+
+        public async Task<Book> GetById(int id)
+        {
+            return await libraryDb.Books.FirstOrDefaultAsync(i=>i.Id==id);
+        }
+
+        public async Task<bool> Update(Book book)
+        {
+            try
+            {
+
+                libraryDb.Books.Update(book);
+                await libraryDb.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
             }
         }
     }

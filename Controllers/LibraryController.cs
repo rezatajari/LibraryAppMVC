@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 using LibraryAppMVC.Interfaces;
+using LibraryAppMVC.Repositories;
 using LibraryAppMVC.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAppMVC.Controllers
@@ -17,12 +19,12 @@ namespace LibraryAppMVC.Controllers
         }
 
         //------- Add Section -------//
-        [HttpGet(template: "library/Add") ]
+        [HttpGet(template: "library/Add")]
         public IActionResult Add()
         {
             return View();
         }
-        [HttpPost(template: "library/Add") ]
+        [HttpPost(template: "library/Add")]
         public async Task<IActionResult> Add(BookViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -144,6 +146,86 @@ namespace LibraryAppMVC.Controllers
         public IActionResult BookDetails(BookViewModel book)
         {
             return View(book);
+        }
+
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                // 1. Get the book from your data store
+                var response = await bookService.GetByIdAsync(id);
+                if (!response.Succeeded)
+                {
+                    TempData["ErrorMessage"] = "This book is not exist";
+                    return RedirectToAction("List");
+                }
+
+                // 2. Map to ViewModel
+                var viewModel = new BookViewModel
+                {
+                    Id = response.Data.Id,
+                    Title = response.Data.Title,
+                    Author = response.Data.Author,
+                    Genre = response.Data.Genre
+                    // Map any additional fields
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("List");
+            }
+        }
+
+        [Authorize]
+        [HttpPost("[action]/{id}")]
+        public async Task<IActionResult> Edit(int id, BookViewModel model)
+        {
+            if (id != model.Id)
+            {
+                return BadRequest("Book ID mismatch");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Please correct the errors below";
+                return View(model);
+            }
+
+            try
+            {
+                // 1. Get existing book
+                var existingBook = await bookService.GetByIdAsync(id);
+                if (existingBook == null)
+                {
+                    return NotFound();
+                }
+
+                // 2. Update properties
+                existingBook.Data.Title = model.Title;
+                existingBook.Data.Author = model.Author;
+                existingBook.Data.Genre = model.Genre;
+                // Update additional fields as needed
+
+                // 3. Save changes
+                var updateResult = await bookService.UpdateAsync(existingBook.Data);
+
+                if (!updateResult.Succeeded)
+                {
+                    TempData["ErrorMessage"] = "Failed to update book. Please try again.";
+                    return View(model);
+                }
+
+                TempData["SuccessMessage"] = $"'{model.Title}' has been updated successfully";
+                return RedirectToAction("BookDetails", new { id = model.Id });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while saving. Please try again.";
+                return View(model);
+            }
         }
     }
 }

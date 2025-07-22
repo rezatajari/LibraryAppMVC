@@ -1,88 +1,96 @@
 ﻿@model LibraryAppMVC.ViewModels.ListBookViewModel
-
 @{
-    ViewData["Title"] = "List of books";
+    ViewData["Title"] = "Book Collection";
+    Layout = "_UserLayout";
 }
-<style>
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
 
-    th, td {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-    }
-
-    th {
-        background-color: #f4f4f4;
-        text-align: left;
-    }
-
-    tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-
-    tbody tr:hover {
-        background-color: #f1f1f1;
-    }
-
-    .error {
-        color: red;
-        margin-bottom: 20px;
-    }
-</style>
-
-<h2>Book List</h2>
-
-<!-- Error Message Display -->
-@if (TempData["ErrorMessage"] != null)
-{
-    <div style="color: red; margin-bottom: 20px;">
-        @TempData["ErrorMessage"]
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+        <a href="@Url.Action("Add", "Library")" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="bi bi-plus-circle"></i> Add New Book
+        </a>
     </div>
-}
 
-@if (TempData["RemoveMessage"] != null)
-{
-
-    <div style="color: red;">
-        @TempData["RemoveMessage"]
+    <!-- Books Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Your Books</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Genre</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.BookListViewMode != null && Model.BookListViewMode.Any())
+                        {
+                            @foreach (var book in Model.BookListViewMode)
+                            {
+                                <tr>
+                                    <td>@book.Title</td>
+                                    <td>@book.Author</td>
+                                    <td>@book.Genre</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("BookDetails", "Library", new { id = book.Id })"
+                                               class="btn btn-sm btn-info">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("Edit", "Library", new { id = book.Id })"
+                                               class="btn btn-sm btn-warning">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="@Url.Action("Delete", "Library", new { id = book.Id })"
+                                               class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center">No books found in your collection</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+</div>
+
+@section Styles {
+    <style>
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
 }
 
-<h2>List of books</h2>
-
-@if (Model.BookListViewMode != null && Model.BookListViewMode.Any())
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Genre</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var book in Model.BookListViewMode)
-            {
-                <tr>
-                    <td>@book.Title</td>
-                    <td>@book.Author</td>
-                    <td>@book.Genre</td>
-                    <td>
-                        <a asp-action="Delete" asp-route-id="@book.Title" class="btn btn-sm btn-danger">Delete</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <div class="alert alert-info">
-        No books found in your library.
-    </div>
+@section Scripts {
+    <script>
+        // Optional: Add confirmation for delete action
+        document.querySelectorAll('.btn-danger').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to delete this book?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 }

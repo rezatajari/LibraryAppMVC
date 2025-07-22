@@ -1,6 +1,7 @@
-﻿@model LibraryAppMVC.ViewModels.BookViewModel
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model LibraryAppMVC.ViewModels.BookViewModel
 @{
-    ViewData["Title"] = "Add Book";
+    ViewData["Title"] = "Edit Book";
     Layout = "_UserLayout";
 }
 
@@ -8,8 +9,9 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
-        <a href="@Url.Action("Home", "Library")" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
-            <i class="bi bi-arrow-left"></i> Back to Library
+        <a href="@Url.Action("BookDetails", "Library", new { id = Model.Id })"
+           class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+            <i class="bi bi-arrow-left"></i> Back to Details
         </a>
     </div>
 
@@ -32,11 +34,13 @@
 
     <!-- Form Card -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Book Details</h6>
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 font-weight-bold">Editing: @Model.Title</h6>
         </div>
         <div class="card-body">
-            <form asp-action="Add" class="needs-validation" novalidate>
+            <form asp-action="Edit" method="post" class="needs-validation" novalidate>
+                <input type="hidden" asp-for="Id" />
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group mb-3">
@@ -58,20 +62,22 @@
                     <div class="col-md-6">
                         <div class="form-group mb-4">
                             <label asp-for="Genre" class="form-label">Genre *</label>
-                            <select asp-for="Genre" class="form-select" asp-items="Html.GetEnumSelectList<Book.GenreType>()" required>
+                            <select asp-for="Genre" class="form-select"
+                                    asp-items="Html.GetEnumSelectList<Book.GenreType>()" required>
                                 <option value="">-- Select Genre --</option>
                             </select>
                             <span asp-validation-for="Genre" class="text-danger small"></span>
                         </div>
                     </div>
-                    <!-- Additional fields can be added in the second column -->
+                    <!-- Additional fields column can be added here -->
                 </div>
 
                 <div class="form-group mt-4">
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Add Book
+                        <i class="bi bi-save"></i> Save Changes
                     </button>
-                    <a href="@Url.Action("Home", "Library")" class="btn btn-outline-secondary ms-2">
+                    <a href="@Url.Action("BookDetails", "Library", new { id = Model.Id })"
+                       class="btn btn-outline-secondary ms-2">
                         <i class="bi bi-x-circle"></i> Cancel
                     </a>
                 </div>
@@ -85,11 +91,11 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        // Client-side validation enhancement
+        // Enhanced client-side validation
         (function () {
             'use strict'
 
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            // Fetch all forms we want to apply validation to
             var forms = document.querySelectorAll('.needs-validation')
 
             // Loop over them and prevent submission
@@ -118,8 +124,13 @@
             border-radius: 10px;
         }
 
-        .card-header {
+        .card-header.bg-primary {
             border-radius: 10px 10px 0 0 !important;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         }
     </style>
 }

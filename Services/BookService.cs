@@ -78,6 +78,7 @@ namespace LibraryAppMVC.Services
                 {
                     BookListViewMode = result.Data.Select(book => new BookViewModel
                     {
+                        Id = book.Id,
                         Title = book.Title,
                         Author = book.Author,
                         Genre = book.Genre
@@ -127,6 +128,22 @@ namespace LibraryAppMVC.Services
                 return ResultTask<bool>.Failure(ex.Message);
             }
         }
+
+        public async Task<ResultTask<Book>> GetByIdAsync(int id)
+        {
+          var book=   await bookRepository.GetById(id);
+          if (book == null)
+              return ResultTask<Book>.Failure(errorMessage: "The book is not found");
+
+          return ResultTask<Book>.Success(book);
+        }
+
+        public async Task<ResultTask<bool>> UpdateAsync(Book book)
+        {
+            var result = await bookRepository.Update(book);
+            return result ? ResultTask<bool>.Success(true) : ResultTask<bool>.Failure("Your book is not updated");
+        }
+
         // ------------ Private ------------
         private async Task<ResultTask<bool>> BookValidationExist(BookViewModel newBook, string userId)
         {
@@ -156,5 +173,6 @@ namespace LibraryAppMVC.Services
             if (result.Data != null) return ResultTask<Book>.Success(data: result.Data);
             return ResultTask<Book>.Failure("Book is null");
         }
+
     }
 }
