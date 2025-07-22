@@ -3,12 +3,10 @@ using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
 using LibraryAppMVC.Repositories;
 using LibraryAppMVC.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
@@ -66,26 +64,6 @@ builder.Services.AddTransient<IBookRepository, BookRepository>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 builder.Services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<JwtService>();
-builder.Services.AddAuthentication(configureOptions: options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey("Key"u8.ToArray())
-        };
-    });
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

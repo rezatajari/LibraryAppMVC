@@ -20,7 +20,7 @@ namespace LibraryAppMVC.Controllers
             return View();
         }
         [HttpPost(template: "[action]")]
-        public async Task<IActionResult> Login( LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
 

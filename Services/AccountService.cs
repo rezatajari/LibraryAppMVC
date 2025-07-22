@@ -18,12 +18,11 @@ namespace LibraryAppMVC.Services
         private readonly IUrlHelper _urlHelper;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailSender _emailSender;
-        private readonly JwtService _jwtService;
         public AccountService(ILogger<AccountService> logger,
                 UserManager<User> userManager, SignInManager<User> signInManager,
                 IUrlHelperFactory helperFactory, IHttpContextAccessor httpContextAccessor,
-                IEmailSender emailSender,
-                JwtService jwtService)
+               IEmailSender emailSender
+               )
         {
             _logger = logger;
             _userManager = userManager;
@@ -35,7 +34,6 @@ namespace LibraryAppMVC.Services
                 new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
             _urlHelper = helperFactory.GetUrlHelper(actionContext);
             _emailSender = emailSender;
-            _jwtService = jwtService;
         }
 
         //------------------ Account Services ------------------//
