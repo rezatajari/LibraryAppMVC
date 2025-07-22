@@ -5,8 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraryAppMVC.Data
 {
-    public class LibraryDb(DbContextOptions<LibraryDb> options) : IdentityDbContext<User>(options)
+    public class LibraryDb: IdentityDbContext<User>
     {
+        public LibraryDb(DbContextOptions<LibraryDb> options) : base(options)
+        {
+        }
         public DbSet<Book> Books { get; set; }
 
         // public DbSet<User> Users { get; set; } is removed because you are now using ApplicationUser

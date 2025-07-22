@@ -16,6 +16,22 @@ using Serilog.Sinks.MSSqlServer;
 var builder = WebApplication.CreateBuilder(args);
 
 
+builder.Services.AddDbContext<LibraryDb>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDB")));
+
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+        options.Password.RequireDigit = false;
+        options.SignIn.RequireConfirmedEmail = true; 
+        options.Password.RequiredLength = 4; 
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+        options.SignIn.RequireConfirmedEmail = true;
+    })
+    .AddEntityFrameworkStores<LibraryDb>()
+    .AddDefaultTokenProviders();
 
 
 // Configure Serilog
@@ -34,22 +50,7 @@ builder.Services.AddLogging(logging =>
     logging.AddSerilog();
 });
 
-builder.Services.AddDbContext<LibraryDb>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("LibraryDB")));
 
-builder.Services.AddIdentity<User, IdentityRole>(options =>
-    {
-        options.User.RequireUniqueEmail = true;
-        options.Password.RequireDigit = false;
-        options.SignIn.RequireConfirmedEmail = true; // Enable email confirmation
-        options.Password.RequiredLength = 4; // Set password policies as needed
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
-        options.SignIn.RequireConfirmedEmail = true;
-    })
-    .AddEntityFrameworkStores<LibraryDb>()
-    .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddTransient<IBookService, BookService>();
