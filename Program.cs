@@ -3,6 +3,7 @@ using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.Models;
 using LibraryAppMVC.Repositories;
 using LibraryAppMVC.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -31,7 +32,11 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     .AddEntityFrameworkStores<LibraryDb>()
     .AddDefaultTokenProviders();
 
-
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    })
+    .AddCookie();
 // Configure Serilog
 Log.Logger = new LoggerConfiguration().MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
  .MinimumLevel.Override("System", LogEventLevel.Warning)

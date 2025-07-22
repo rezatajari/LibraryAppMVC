@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using LibraryAppMVC.Interfaces;
 using LibraryAppMVC.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAppMVC.Controllers
@@ -86,14 +87,14 @@ namespace LibraryAppMVC.Controllers
             TempData["ErrorMessage"] = "Failed to deleted your account";
             return RedirectToAction(actionName: "Error", controllerName: "Home");
         }
-        [HttpGet]
+        [HttpGet(template:"[action]")]
         public IActionResult AccountDeleted()
         {
             return View();
         }
 
         //------- Logout Section -------//
-        [HttpGet]
+        [HttpGet(template: "[action]")]
         public IActionResult Logout()
         {
             return RedirectToAction("Index", "Home");
@@ -102,20 +103,22 @@ namespace LibraryAppMVC.Controllers
         //================================ Profile Section ================================//
 
         //------- Profile Page Section -------//
+        [Authorize]
         [HttpGet(template: "[action]")]
-        public async Task<IActionResult> Profile(string email)
+        public async Task<IActionResult> Profile()
         {
-            if (!ModelState.IsValid) return Redirect("Login");
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var result = await accountService.GetUserByEmail(email);
 
             if (result.Succeeded)
                 return View(result.Data);
 
             ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
-            return View();
+            return View(new ProfileViewModel());
         }
 
         //------- Edit Profile Section -------//
+        [Authorize]
         [HttpGet(template: "[action]")]
         public async Task<IActionResult> EditProfile(string email)
         {
@@ -127,6 +130,7 @@ namespace LibraryAppMVC.Controllers
             ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
             return View();
         }
+        [Authorize]
         [HttpPost(template: "[action]")]
         public async Task<IActionResult> EditProfile(ProfileViewModel model)
         {

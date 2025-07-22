@@ -1,32 +1,147 @@
 ﻿@{
-    ViewData["Title"] = "Library Management Home";
+    ViewData["Title"] = "Library Management";
+    Layout = "_UserLayout";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+    </div>
 
-
-<div class="container">
+    <!-- Action Cards -->
     <div class="row">
-        <div class="col-md-3">
-            <a href="@Url.Action("Add", "Library")" class="btn btn-primary btn-block">Add Book</a>
+        <!-- Add Book Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Add New Book
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">Expand Your Collection</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-plus-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <a href="@Url.Action("Add", "Library")" class="stretched-link"></a>
+                </div>
+            </div>
         </div>
-        <div class="col-md-3">
-            <a href="@Url.Action("Search", "Library")" class="btn btn-info btn-block">Search Book</a>
+
+        <!-- Search Books Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Search Books
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">Find What You Need</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-search fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <a href="@Url.Action("Search", "Library")" class="stretched-link"></a>
+                </div>
+            </div>
         </div>
-        <div class="col-md-3">
-            <a href="@Url.Action("List", "Library")" class="btn btn-success btn-block">List Books</a>
+
+        <!-- List Books Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                View Collection
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">Browse All Books</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-list-ul fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <a href="@Url.Action("List", "Library")" class="stretched-link"></a>
+                </div>
+            </div>
         </div>
-        <div class="col-md-3">
-            <a href="@Url.Action("Profile", "Account")" class="btn btn-info btn-block">Profile</a>
+
+        <!-- Quick Actions Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Quick Actions
+                            </div>
+                            <div class="mb-1">
+                                <a href="@Url.Action("Profile", "Account")" class="btn btn-sm btn-info btn-block">
+                                    <i class="bi bi-person"></i> Profile
+                                </a>
+                            </div>
+                            <div class="mb-0">
+                                <a href="@Url.Action("Home", "Library")" class="btn btn-sm btn-secondary btn-block">
+                                    <i class="bi bi-house"></i> Library Home
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-lightning fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Recent Activity</h6>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                <div class="list-group-item">
+                    <i class="bi bi-plus-circle-fill text-success me-2"></i>
+                    You recently added "The Great Gatsby" to your collection
+                    <small class="text-muted float-end">2 days ago</small>
+                </div>
+                <div class="list-group-item">
+                    <i class="bi bi-pencil-fill text-primary me-2"></i>
+                    You updated details for "To Kill a Mockingbird"
+                    <small class="text-muted float-end">1 week ago</small>
+                </div>
+                <!-- More activity items can be added here -->
+            </div>
         </div>
     </div>
 </div>
 
-<style>
-    .container {
-        margin-top: 50px;
-    }
-    .btn-block {
-        margin-bottom: 20px;
-    }
-</style>
+@section Styles {
+    <style>
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }
+
+        .stretched-link::after {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1;
+            content: "";
+        }
+    </style>
+}
