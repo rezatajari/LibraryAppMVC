@@ -142,10 +142,25 @@ namespace LibraryAppMVC.Controllers
         }
 
         //------- Details Section -------//
-        [HttpGet(template: "Library/BookDetails")]
-        public IActionResult BookDetails(BookViewModel book)
+        [HttpGet(template: "Library/BookDetails/{id}")]
+        public async Task<IActionResult> BookDetails(int id)
         {
-            return View(book);
+            var result=await bookService.GetByIdAsync(id);
+            if (!result.Succeeded)
+            {
+                TempData["ErrorMessage"] = "Your book is not exist";
+                return RedirectToAction("List");
+            }
+
+            var model = new BookViewModel
+            {
+                Id = result.Data.Id,
+                Title = result.Data.Title,
+                Author = result.Data.Author,
+                Genre = result.Data.Genre
+            };
+
+            return View(model);
         }
 
         [HttpGet("[action]/{id}")]
