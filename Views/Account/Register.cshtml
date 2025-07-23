@@ -97,7 +97,7 @@
             <!-- Validation Summary -->
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-            <form asp-action="Register" method="post">
+            <form asp-action="Register" asp-controller="Account" method="post">
                 <div class="mb-3">
                     <label for="UserName" class="form-label">Username</label>
                     <input asp-for="UserName" id="UserName" class="form-control" placeholder="Enter your username" required>

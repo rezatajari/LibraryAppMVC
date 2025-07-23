@@ -7,7 +7,7 @@ namespace LibraryAppMVC.ViewModels
     {
         [Required]
         [DisplayName("Username")]
-        public string? UserName { get; set; }
+        public string UserName { get; set; }
 
         [Required]
         [DataType(DataType.Password)]

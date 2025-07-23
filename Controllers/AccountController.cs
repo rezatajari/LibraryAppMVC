@@ -12,9 +12,8 @@ namespace LibraryAppMVC.Controllers
         ILogger<AccountController> logger)
         : Controller
     {
-        //================================ Account Section ================================//
+        #region Login
 
-        //------- Login Section -------//
         [HttpGet(template: "[action]")]
         public IActionResult Login()
         {
@@ -28,16 +27,19 @@ namespace LibraryAppMVC.Controllers
             var result = await accountService.LogIn(model);
             if (!result.Succeeded)
             {
-                ModelState.AddModelError(key: string.Empty, result.ErrorMessage ?? "Log in failed");
+                ModelState.AddModelError(key: string.Empty, errorMessage: result.ErrorMessage ?? "Login failed!");
                 logger.LogError("{Email} at {Time} has {Error}", model.Email, DateTime.UtcNow, result.ErrorMessage);
                 return View(model);
             }
 
             logger.LogInformation("{Email} logged in successfully at {Time}.", model.Email, DateTime.UtcNow);
-            return RedirectToAction("Profile",new {email=model.Email});
+            return RedirectToAction("Profile",routeValues:new {email=model.Email});
         }
 
-        //------- Register Section -------//
+        #endregion
+
+        #region Register
+
         [HttpGet(template: "[action]")]
         public ActionResult Register()
         {
@@ -52,14 +54,16 @@ namespace LibraryAppMVC.Controllers
 
             if (!result.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Registration is failed");
+                ModelState.AddModelError(key:string.Empty, result.ErrorMessage ?? "Registration is failed");
                 return View(model);
             }
 
             TempData["Registered"] = "Registration successful! A confirmation email has been sent to your email address." +
-                " Please confirm your email to activate your account.";
+                                     " Please confirm your email to activate your account.";
             return RedirectToAction("Login");
         }
+
+        #endregion
 
         //------- Confirmation Email Section -------//
         [HttpGet(template: "[action]")]

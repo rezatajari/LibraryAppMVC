@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace LibraryAppMVC.Services
@@ -37,51 +38,28 @@ namespace LibraryAppMVC.Services
         }
 
         //------------------ Account Services ------------------//
-        public async Task<ResultTask<SignInResult>> LogIn(LoginViewModel model)
+        public async Task<ResultTask<bool>> LogIn(LoginViewModel model)
         {
-            // Check email exist
-            if (model.Email == null)
-                return ResultTask<SignInResult>.Failure("The email of user is null");
-
             // Check user exist
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
-                return ResultTask<SignInResult>.Failure("User not found!");
-
-            // Check user password
-            if(string.IsNullOrEmpty(model.Password))
-                return ResultTask<SignInResult>.Failure("The password is null or empty");
-            var passValidation = await _userManager.CheckPasswordAsync(user, model.Password);
-            if (!passValidation)
-                return ResultTask<SignInResult>.Failure("Your password is wrong");
+                return ResultTask<bool>.Failure($"User not found by this email: {model.Email}");
 
             // Check email confirmation
             if (!await _userManager.IsEmailConfirmedAsync(user))
-                return ResultTask<SignInResult>.Failure("Email is not confirmed");
+                return ResultTask<bool>.Failure("Email is not confirmed");
 
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password,
+            var signInResult = await _signInManager.PasswordSignInAsync(user, model.Password,
                       isPersistent: true, lockoutOnFailure: false);
 
-            return ResultTask<SignInResult>.Success(result);
+            return !signInResult.Succeeded
+                ? ResultTask<bool>.Failure("Sign in processor is failed!")
+                : ResultTask<bool>.Success(true);
         }
+
         public async Task<ResultTask<bool>> Registration(RegisterViewModel model)
         {
             // register
-            var registerResult = await RegisterUserOnly(model);
-            if (!registerResult.Succeeded)
-                return registerResult;
-
-            // send email
-            var emailResult = await SendEmailConfirmation(model.Email);
-            if (!emailResult.Succeeded)
-                return ResultTask<bool>.Failure(emailResult.ErrorMessage);
-
-            // registration result
-            return ResultTask<bool>.Success(true);
-
-        }
-        private async Task<ResultTask<bool>> RegisterUserOnly(RegisterViewModel model)
-        {
             var userExist = await _userManager.FindByEmailAsync(model.Email);
             if (userExist != null)
                 return ResultTask<bool>.Failure("An account with this email already exists.");
@@ -93,24 +71,19 @@ namespace LibraryAppMVC.Services
                 Email = model.Email
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
+            var userCreateResult = await _userManager.CreateAsync(user, model.Password);
+            if (!userCreateResult.Succeeded)
             {
                 _logger.LogError("Failed to create user {Email} at {Time}: {Errors}",
                     model.Email,
                     DateTime.UtcNow,
-                    string.Join(", ", result.Errors.SelectMany(e => e.Description)));
-                return ResultTask<bool>.Failure(result.Errors.FirstOrDefault()?.Description ?? "An error occurred while creating the user.");
+                    string.Join(", ", userCreateResult.Errors.SelectMany(e => e.Description)));
+                return ResultTask<bool>.Failure(userCreateResult.Errors.FirstOrDefault()?.Description ?? "An error occurred while creating the user.");
             }
-
             _logger.LogInformation("User created successfully for {Email} at {Time}.", model.Email, DateTime.UtcNow);
-            return ResultTask<bool>.Success(true);
-        }
-        private async Task<ResultTask<bool>> SendEmailConfirmation(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return ResultTask<bool>.Failure("User is null");
 
+
+            // send email
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var confirmationLink = _urlHelper.Action(
                 action: "ConfirmEmail",
@@ -124,7 +97,7 @@ namespace LibraryAppMVC.Services
                 $"Please confirm your email by clicking the following link: <a href='{confirmationLink}'>Confirm Email</a>";
             try
             {
-                await _emailSender.SendEmailAsync(email, subject, message);
+                await _emailSender.SendEmailAsync(user.Email, subject, message);
             }
             catch (Exception ex)
             {
@@ -132,8 +105,10 @@ namespace LibraryAppMVC.Services
                 return ResultTask<bool>.Failure("Failed to send email.");
             }
 
+            // registration result
             return ResultTask<bool>.Success(true);
         }
+
         public async Task<ResultTask<bool>> ConfirmationEmailProcess(string userId, string token)
         {
             // Validation userId & token of user
