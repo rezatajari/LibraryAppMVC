@@ -7,12 +7,12 @@ using LibraryAppMVC.Interfaces;
 
 namespace LibraryAppMVC.Controllers
 {
-   [Authorize]
+  // [Authorize]
     public class ProfileController(IProfileService profileService) : Controller
     {
         private readonly IProfileService _profileService = profileService;
 
-        [HttpGet(template: "[action]")]
+        [HttpGet]
         public async Task<IActionResult> Profile()
         {
             var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;

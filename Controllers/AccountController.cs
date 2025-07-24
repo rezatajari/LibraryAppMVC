@@ -33,7 +33,7 @@ namespace LibraryAppMVC.Controllers
             }
 
             logger.LogInformation("{Email} logged in successfully at {Time}.", model.Email, DateTime.UtcNow);
-            return RedirectToAction(controllerName:"Profile",actionName:"Profile",routeValues:new {email=model.Email});
+            return RedirectToAction(controllerName:"Library",actionName:"Home",routeValues:new {email=model.Email});
         }
 
         #endregion
@@ -82,23 +82,25 @@ namespace LibraryAppMVC.Controllers
 
         #endregion
 
-        [Authorize]
-        [HttpPost(template: "[action]/{email}")]
-        public async Task<IActionResult> Delete(string email)
-        {
-            var result = await accountService.DeleteAccount(email);
-
-            if (result.Succeeded) return RedirectToAction("Delete");
-
-            TempData["ErrorMessage"] = "Failed to deleted your account";
-            return RedirectToAction(actionName: "Profile", controllerName: "Profile");
-        }
 
         [Authorize]
         [HttpGet(template:"[action]")]
-        public IActionResult Delete()
+        public IActionResult DeleteConfirmation()
         {
             return View();
+        }
+
+        [Authorize]
+        [HttpPost(template: "[action]")]
+        public async Task<IActionResult> Delete()
+        {
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var result = await accountService.DeleteAccount(email);
+
+            if (result.Succeeded) return RedirectToAction(controllerName:"Home",actionName:"AccountDeleted");
+
+            TempData["ErrorMessage"] = "Failed to deleted your account";
+            return RedirectToAction(actionName: "Profile", controllerName: "Profile");
         }
 
         //------- Logout Section -------//
@@ -107,7 +109,5 @@ namespace LibraryAppMVC.Controllers
         {
             return RedirectToAction("Index", "Home");
         }
-
-     
     }
 }

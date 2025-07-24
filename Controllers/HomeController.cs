@@ -13,6 +13,12 @@ namespace LibraryAppMVC.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult AccountDeleted()
+        {
+            return View();
+        }
+
         [HttpGet(template: "Home/Error")]
         public IActionResult Error()
         {
