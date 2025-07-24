@@ -127,6 +127,7 @@ namespace LibraryAppMVC.Services
             if (!result.Succeeded)
                 return ResultTask<bool>.Failure(string.Join(", ", result.Errors.SelectMany(e => e.Description)));
 
+            await _signInManager.SignOutAsync();
             return ResultTask<bool>.Success(true);
         }
     }

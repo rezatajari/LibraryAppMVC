@@ -82,19 +82,21 @@ namespace LibraryAppMVC.Controllers
 
         #endregion
 
-        //------- Delete Account Section -------//
-        [HttpGet(template: "[action]/{email}")]
-        public async Task<IActionResult> DeleteAccount(string email)
+        [Authorize]
+        [HttpPost(template: "[action]/{email}")]
+        public async Task<IActionResult> Delete(string email)
         {
             var result = await accountService.DeleteAccount(email);
 
-            if (result.Succeeded) return RedirectToAction("AccountDeleted");
+            if (result.Succeeded) return RedirectToAction("Delete");
 
             TempData["ErrorMessage"] = "Failed to deleted your account";
-            return RedirectToAction(actionName: "Error", controllerName: "Home");
+            return RedirectToAction(actionName: "Profile", controllerName: "Profile");
         }
+
+        [Authorize]
         [HttpGet(template:"[action]")]
-        public IActionResult AccountDeleted()
+        public IActionResult Delete()
         {
             return View();
         }
