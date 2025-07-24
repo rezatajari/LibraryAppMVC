@@ -33,7 +33,7 @@ namespace LibraryAppMVC.Controllers
             }
 
             logger.LogInformation("{Email} logged in successfully at {Time}.", model.Email, DateTime.UtcNow);
-            return RedirectToAction("Profile",routeValues:new {email=model.Email});
+            return RedirectToAction(controllerName:"Profile",actionName:"Profile",routeValues:new {email=model.Email});
         }
 
         #endregion
@@ -64,6 +64,8 @@ namespace LibraryAppMVC.Controllers
 
         #endregion
 
+        #region Email Confirmation
+
         [HttpGet(template: "[action]")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -77,6 +79,8 @@ namespace LibraryAppMVC.Controllers
         {
             return View();
         }
+
+        #endregion
 
         //------- Delete Account Section -------//
         [HttpGet(template: "[action]/{email}")]
@@ -102,57 +106,6 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        //================================ Profile Section ================================//
-
-        //------- Profile Page Section -------//
-        [Authorize]
-        [HttpGet(template: "[action]")]
-        public async Task<IActionResult> Profile()
-        {
-            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var result = await accountService.GetUserByEmail(email);
-
-            if (result.Succeeded)
-                return View(result.Data);
-
-            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
-            return View(new ProfileViewModel());
-        }
-
-        //------- Edit Profile Section -------//
-        [Authorize]
-        [HttpGet(template: "[action]")]
-        public async Task<IActionResult> EditProfile(string email)
-        {
-            var result = await accountService.GetUserByEmail(email);
-
-            if (result.Succeeded)
-                return View(result.Data);
-
-            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
-            return View();
-        }
-        [Authorize]
-        [HttpPost(template: "[action]")]
-        public async Task<IActionResult> EditProfile(ProfileViewModel model)
-        {
-            if (!ModelState.IsValid) return View(model);
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (currentUserId == null)
-            {
-                ModelState.AddModelError(string.Empty, "User is not exist");
-                return View(model);
-            }
-
-            var result = await accountService.EditProfileUser(model, currentUserId);
-            if (!result.Succeeded)
-            {
-                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? string.Empty);
-                return View(model);
-            }
-
-            TempData["SuccessMessage"] = "Profile updated successfully!";
-            return RedirectToAction("Profile");
-        }
+     
     }
 }

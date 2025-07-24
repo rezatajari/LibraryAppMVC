@@ -11,9 +11,5 @@ namespace LibraryAppMVC.Interfaces
         Task<ResultTask<bool>> Registration(RegisterViewModel model);
         Task<ResultTask<bool>> ConfirmationEmailProcess(string userId, string token);
         Task<ResultTask<bool>> DeleteAccount(string email);
-
-        //------------------ Profile Services ------------------//
-        Task<ResultTask<ProfileViewModel>> GetUserByEmail(string email);
-        Task<ResultTask<bool>> EditProfileUser(ProfileViewModel model,string userId);
     }
 }

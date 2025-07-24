@@ -66,6 +66,7 @@ builder.Services.AddLogging(logging =>
 builder.Services.AddTransient<IBookService, BookService>();
 builder.Services.AddTransient<IBookRepository, BookRepository>();
 builder.Services.AddTransient<IAccountService, AccountService>();
+builder.Services.AddTransient<IProfileService, ProfileService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHttpContextAccessor();
 

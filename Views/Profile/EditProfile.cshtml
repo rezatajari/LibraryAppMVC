@@ -1,4 +1,4 @@
-﻿@model LibraryAppMVC.ViewModels.ProfileViewModel
+﻿@model LibraryAppMVC.ViewModels.EditProfileViewModel
 @{
     ViewData["Title"] = "Edit Profile";
     Layout = "_UserLayout";
@@ -17,7 +17,7 @@
     <div class="profile-card">
         <h2 class="mb-4">Edit Profile</h2>
 
-        <form asp-action="EditProfile" asp-controller="Account" method="post" enctype="multipart/form-data" class="row g-3">
+        <form asp-action="EditProfile" asp-controller="Profile" method="post" enctype="multipart/form-data" class="row g-3">
             <!-- Profile Picture Section -->
             <div class="col-md-4">
                 <div class="text-center mb-4">
@@ -53,14 +53,6 @@
                             <span asp-validation-for="UserName" class="text-danger small"></span>
                         </div>
                     </div>
-
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label">Email Address</label>
-                            <input asp-for="Email" class="form-control" />
-                            <span asp-validation-for="Email" class="text-danger small"></span>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Additional fields can be added here -->
@@ -77,7 +69,7 @@
                     <button type="submit" class="btn btn-primary me-2">
                         <i class="bi bi-save"></i> Save Changes
                     </button>
-                    <a asp-controller="Profile" asp-action="Index" class="btn btn-outline-secondary">
+                    <a asp-controller="Profile" asp-action="EditProfile" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i> Back to Profile
                     </a>
                 </div>

@@ -46,8 +46,6 @@ namespace LibraryAppMVC.Services
                 ? ResultTask<bool>.Failure("Sign in processor is failed!")
                 : ResultTask<bool>.Success(true);
         }
-
-
         public async Task<ResultTask<bool>> Registration(RegisterViewModel model)
         {
 
@@ -75,7 +73,7 @@ namespace LibraryAppMVC.Services
             _logger.LogInformation("User created successfully for {Email} at {Time}.", model.Email, DateTime.UtcNow);
 
 
-            // send email
+            // send email for confirmation registration
             var emailResult = await _emailService.SendEmail(user);
             if (!emailResult.Succeeded)
                 return ResultTask<bool>.Failure(emailResult.ErrorMessage);
@@ -83,7 +81,6 @@ namespace LibraryAppMVC.Services
             // registration result
             return ResultTask<bool>.Success(true);
         }
-
         public async Task<ResultTask<bool>> ConfirmationEmailProcess(string userId, string token)
         {
             // Validation userId & token of user
@@ -131,68 +128,6 @@ namespace LibraryAppMVC.Services
                 return ResultTask<bool>.Failure(string.Join(", ", result.Errors.SelectMany(e => e.Description)));
 
             return ResultTask<bool>.Success(true);
-        }
-
-        //------------------ Profile Services ------------------//
-        public async Task<ResultTask<ProfileViewModel>> GetUserByEmail(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-                return ResultTask<ProfileViewModel>.Failure("User is not found!");
-
-            var profile = new ProfileViewModel
-            {
-                UserName = user.UserName,
-                Email = user.Email,
-                ExistProfilePicture = user.ProfilePicturePath
-            };
-
-            return ResultTask<ProfileViewModel>.Success(data: profile);
-        }
-        public async Task<ResultTask<bool>> EditProfileUser(ProfileViewModel model, string currentUserId)
-        {
-            // Get current user information
-            if (model.Email == null) return ResultTask<bool>.Failure("The email is null");
-            var currentUser = await _userManager.FindByEmailAsync(model.Email);
-            if (currentUser == null)
-                return ResultTask<bool>.Failure("User by this information is not found.");
-
-            // Existing user by another userId with the new email edited
-            var emailValidation = currentUser.Id != currentUserId;
-            if (emailValidation)
-                return ResultTask<bool>.Failure("This email address is already in use.");
-
-            // Set edited new information
-            currentUser.UserName = model.UserName;
-
-            // Generate profile picture path and save picture file
-            if (model.ProfilePicture != null)
-            {
-                var fileName = await FileNamePictureProfile(model.ProfilePicture);
-                currentUser.ProfilePicturePath = "/uploads/" + fileName;
-            }
-
-            var result = await _userManager.UpdateAsync(currentUser);
-            if (!result.Succeeded)
-                return ResultTask<bool>.Failure(string.Join(", ", result.Errors.SelectMany(e => e.Description)));
-
-            return ResultTask<bool>.Success(true);
-        }
-        private async Task<string> FileNamePictureProfile(IFormFile profilePicture)
-        {
-            // Define the folder to save the file
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-            Directory.CreateDirectory(uploadsFolder);
-
-            // Generate a unique file name
-            var fileName = Guid.NewGuid() + Path.GetExtension(profilePicture.FileName);
-
-            // Save the file to the folder
-            var filePath = Path.Combine(uploadsFolder, fileName);
-            await using var stream = new FileStream(filePath, FileMode.Create);
-            await profilePicture.CopyToAsync(stream);
-
-            return fileName;
         }
     }
 }
