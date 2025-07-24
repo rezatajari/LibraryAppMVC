@@ -63,11 +63,10 @@ builder.Services.AddLogging(logging =>
     logging.AddSerilog();
 });
 
-builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddTransient<IBookService, BookService>();
 builder.Services.AddTransient<IBookRepository, BookRepository>();
 builder.Services.AddTransient<IAccountService, AccountService>();
-builder.Services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.

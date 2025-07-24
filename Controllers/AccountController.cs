@@ -49,7 +49,6 @@ namespace LibraryAppMVC.Controllers
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
-
             var result = await accountService.Registration(model);
 
             if (!result.Succeeded)
@@ -65,7 +64,6 @@ namespace LibraryAppMVC.Controllers
 
         #endregion
 
-        //------- Confirmation Email Section -------//
         [HttpGet(template: "[action]")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {

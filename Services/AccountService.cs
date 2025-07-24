@@ -16,36 +16,26 @@ namespace LibraryAppMVC.Services
         private readonly ILogger<AccountService> _logger;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly IUrlHelper _urlHelper;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IEmailSender _emailSender;
+        private readonly IEmailService _emailService;
+
         public AccountService(ILogger<AccountService> logger,
-                UserManager<User> userManager, SignInManager<User> signInManager,
-                IUrlHelperFactory helperFactory, IHttpContextAccessor httpContextAccessor,
-               IEmailSender emailSender
+                UserManager<User> userManager,
+                SignInManager<User> signInManager,
+                IEmailService emailService
                )
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
-            _httpContextAccessor = httpContextAccessor;
-            var actionContext = new ActionContext(
-                _httpContextAccessor.HttpContext,
-                _httpContextAccessor.HttpContext.GetRouteData(),
-                new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
-            _urlHelper = helperFactory.GetUrlHelper(actionContext);
-            _emailSender = emailSender;
+            _emailService = emailService;
         }
 
-        //------------------ Account Services ------------------//
         public async Task<ResultTask<bool>> LogIn(LoginViewModel model)
         {
-            // Check user exist
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
                 return ResultTask<bool>.Failure($"User not found by this email: {model.Email}");
 
-            // Check email confirmation
             if (!await _userManager.IsEmailConfirmedAsync(user))
                 return ResultTask<bool>.Failure("Email is not confirmed");
 
@@ -57,8 +47,10 @@ namespace LibraryAppMVC.Services
                 : ResultTask<bool>.Success(true);
         }
 
+
         public async Task<ResultTask<bool>> Registration(RegisterViewModel model)
         {
+
             // register
             var userExist = await _userManager.FindByEmailAsync(model.Email);
             if (userExist != null)
@@ -84,26 +76,9 @@ namespace LibraryAppMVC.Services
 
 
             // send email
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationLink = _urlHelper.Action(
-                action: "ConfirmEmail",
-                controller: "Account",
-                new { userId = user.Id, token },
-                protocol: _httpContextAccessor.HttpContext?.Request.Scheme
-            );
-
-            const string subject = "Confirm your email";
-            var message =
-                $"Please confirm your email by clicking the following link: <a href='{confirmationLink}'>Confirm Email</a>";
-            try
-            {
-                await _emailSender.SendEmailAsync(user.Email, subject, message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error sending email to {Email}", user.Email);
-                return ResultTask<bool>.Failure("Failed to send email.");
-            }
+            var emailResult = await _emailService.SendEmail(user);
+            if (!emailResult.Succeeded)
+                return ResultTask<bool>.Failure(emailResult.ErrorMessage);
 
             // registration result
             return ResultTask<bool>.Success(true);
