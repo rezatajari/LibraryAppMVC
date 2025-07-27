@@ -40,7 +40,7 @@ A modern ASP.NET Core MVC web application for managing a library system, featuri
 ## Getting Started
 
 ### Prerequisites
-- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - SQL Server (local or remote)
 
 ### Setup
@@ -76,10 +76,9 @@ A modern ASP.NET Core MVC web application for managing a library system, featuri
 ---
 
 ## Technologies Used
-- ASP.NET Core MVC (.NET 8)
+- ASP.NET Core MVC (.NET 9)
 - Entity Framework Core (SQL Server)
 - ASP.NET Identity
-- JWT Authentication
 - Serilog (logging)
 - Razor Views
 
