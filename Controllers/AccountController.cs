@@ -12,7 +12,6 @@ namespace LibraryAppMVC.Controllers
         ILogger<AccountController> logger)
         : Controller
     {
-        #region Login
 
         [HttpGet(template: "[action]")]
         public IActionResult Login()
@@ -36,10 +35,6 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction(controllerName:"Library",actionName:"Home",routeValues:new {email=model.Email});
         }
 
-        #endregion
-
-        #region Register
-
         [HttpGet(template: "[action]")]
         public ActionResult Register()
         {
@@ -62,10 +57,6 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction("Login");
         }
 
-        #endregion
-
-        #region Email Confirmation
-
         [HttpGet(template: "[action]")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -79,9 +70,6 @@ namespace LibraryAppMVC.Controllers
         {
             return View();
         }
-
-        #endregion
-
 
         [Authorize]
         [HttpGet(template:"[action]")]
@@ -103,10 +91,10 @@ namespace LibraryAppMVC.Controllers
             return RedirectToAction(actionName: "Profile", controllerName: "Profile");
         }
 
-        //------- Logout Section -------//
         [HttpGet(template: "[action]")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
+            await accountService.LogoutAsync();
             return RedirectToAction("Index", "Home");
         }
     }

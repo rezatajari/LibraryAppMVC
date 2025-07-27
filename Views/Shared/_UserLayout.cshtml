@@ -1,7 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Personal Library</title>
@@ -13,12 +12,15 @@
     <style>
         :root {
             --sidebar-width: 250px;
+            --sidebar-collapsed-width: 70px;
+            --transition-speed: 0.3s;
         }
-        
+
         body {
             display: flex;
             min-height: 100vh;
             background-color: #f8f9fa;
+            transition: margin var(--transition-speed);
         }
 
         .sidebar {
@@ -28,19 +30,23 @@
             background: #343a40;
             color: white;
             padding: 20px 0;
-            transition: all 0.3s;
+            transition: width var(--transition-speed);
+            overflow: hidden;
+            z-index: 1000;
         }
 
         .main-content {
             margin-left: var(--sidebar-width);
             width: calc(100% - var(--sidebar-width));
             padding: 20px;
+            transition: margin var(--transition-speed);
         }
 
         .sidebar-header {
             padding: 10px 20px;
             margin-bottom: 20px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            white-space: nowrap;
         }
 
         .nav-link {
@@ -48,6 +54,10 @@
             padding: 10px 20px;
             margin: 5px 0;
             border-radius: 4px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            transition: all var(--transition-speed);
         }
 
             .nav-link:hover, .nav-link.active {
@@ -58,7 +68,13 @@
 
             .nav-link i {
                 margin-right: 10px;
+                min-width: 24px;
+                text-align: center;
             }
+
+        .nav-link-text {
+            transition: opacity var(--transition-speed);
+        }
 
         .profile-card {
             background: white;
@@ -75,41 +91,155 @@
             border: 5px solid #f8f9fa;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+
+        /* Mobile styles */
+        @@media (max-width: 992px) {
+            .sidebar
+
+        {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+            width: calc(100% - var(--sidebar-collapsed-width));
+        }
+
+        .sidebar-header h4 {
+            display: none;
+        }
+
+        .nav-link-text {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .sidebar:hover {
+            width: var(--sidebar-width);
+        }
+
+            .sidebar:hover .nav-link-text {
+                opacity: 1;
+                position: relative;
+            }
+
+            .sidebar:hover .sidebar-header h4 {
+                display: block;
+            }
+
+        }
+
+        /* Toggle button */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1100;
+            background: #343a40;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @@media (max-width: 992px) {
+            .sidebar-toggle
+
+        {
+            display: block;
+        }
+
+        .sidebar {
+            transform: translateX(-100%);
+            width: var(--sidebar-width);
+        }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+        .main-content {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        }
     </style>
 </head>
 <body>
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="bi bi-list"></i>
+    </button>
+
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h4 class="text-center">My Library</h4>
         </div>
         <nav class="nav flex-column">
-            <a class="nav-link active" asp-controller="Profile" asp-action="Profile">
+            <a class="nav-link" asp-controller="Profile" asp-action="Profile">
                 <i class="bi bi-person"></i>
-                <span>Profile</span>
+                <span class="nav-link-text">Profile</span>
             </a>
             <a class="nav-link" asp-controller="Library" asp-action="Home">
                 <i class="bi bi-book"></i>
-                <span>Book Management</span>
+                <span class="nav-link-text">Book Management</span>
             </a>
             <a class="nav-link" asp-controller="Account" asp-action="Logout">
                 <i class="bi bi-box-arrow-right"></i>
-                <span>Logout</span>
+                <span class="nav-link-text">Logout</span>
             </a>
             <a class="nav-link text-danger" asp-controller="Account" asp-action="DeleteConfirmation">
                 <i class="bi bi-trash"></i>
-                <span>Delete Account</span>
+                <span class="nav-link-text">Delete Account</span>
             </a>
         </nav>
     </div>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <div class="main-content" id="mainContent">
         @RenderBody()
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Responsive and Active Link Script -->
+    <script>
+        // Mobile sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        // Active link highlighting
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname.toLowerCase();
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            // Remove active class from all links first
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+
+                // Check if link matches current path
+                const linkPath = link.getAttribute('href').toLowerCase();
+                if (currentPath === linkPath ||
+                   (currentPath.startsWith(linkPath) && linkPath !== '/')) {
+                    link.classList.add('active');
+                }
+            });
+
+            // If no active link found, default to Profile
+            if (!document.querySelector('.nav-link.active')) {
+                document.querySelector('.nav-link[href*="profile"]').classList.add('active');
+            }
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

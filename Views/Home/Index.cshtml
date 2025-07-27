@@ -14,19 +14,81 @@
             background-size: cover;
             background-position: center;
             color: white;
-            padding: 5rem 0;
+            padding: 3rem 0;
             margin-bottom: 2rem;
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
         }
-        
+
         .feature-icon {
-            font-size: 2.5rem;
+            font-size: 2rem;
             margin-bottom: 1rem;
             color: #0d6efd;
         }
-        
+
         .btn-custom {
             padding: 0.5rem 1.5rem;
             font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .hero-section
+
+        {
+            padding: 2rem 0;
+            min-height: 50vh;
+            text-align: center;
+        }
+
+        .hero-section h1 {
+            font-size: 2.2rem;
+        }
+
+        .hero-section p {
+            font-size: 1.1rem;
+        }
+
+        .btn-custom {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .d-sm-flex {
+            flex-direction: column;
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+        }
+
+        .features-section .col {
+            margin-bottom: 2rem;
+        }
+
+        }
+
+        @@media (max-width: 576px) {
+            .hero-section h1
+
+        {
+            font-size: 1.8rem;
+        }
+
+        .hero-section p {
+            font-size: 1rem;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+        }
+
+        h3.fs-2 {
+            font-size: 1.3rem !important;
+        }
+
         }
     </style>
 </head>
@@ -35,70 +97,78 @@
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="container">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
         </div>
     }
 
     <!-- Hero Section -->
-    <header class="hero-section text-center">
+    <header class="hero-section">
         <div class="container">
-            <h1 class="display-4 fw-bold mb-3">Welcome to Your Personal Library</h1>
-            <p class="lead mb-4">Organize, manage, and enjoy your book collection with ease</p>
-            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-4 gap-3 btn-custom">Login</a>
-                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg px-4 btn-custom">Register</a>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">Welcome to Your Personal Library</h1>
+                    <p class="lead mb-4">Organize, manage, and enjoy your book collection with ease</p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-4 gap-3 btn-custom">Login</a>
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg px-4 btn-custom">Register</a>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Features Section -->
-    <div class="container py-5">
-        <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+    <div class="container py-4 py-lg-5 features-section">
+        <div class="row g-4 row-cols-1 row-cols-md-2 row-cols-lg-3">
             <div class="col d-flex align-items-start">
-                <div class="text-center">
+                <div class="text-center w-100">
                     <div class="feature-icon">
                         <i class="bi bi-book"></i>
                     </div>
                     <h3 class="fs-2">Manage Books</h3>
-                    <p>Add and organize your favorite books in a digital catalog.</p>
+                    <p class="px-3">Add and organize your favorite books in a digital catalog.</p>
                 </div>
             </div>
             <div class="col d-flex align-items-start">
-                <div class="text-center">
+                <div class="text-center w-100">
                     <div class="feature-icon">
                         <i class="bi bi-search"></i>
                     </div>
                     <h3 class="fs-2">Easy Search</h3>
-                    <p>Quickly find any book in your collection with powerful search.</p>
+                    <p class="px-3">Quickly find any book in your collection with powerful search.</p>
                 </div>
             </div>
             <div class="col d-flex align-items-start">
-                <div class="text-center">
+                <div class="text-center w-100">
                     <div class="feature-icon">
                         <i class="bi bi-phone"></i>
                     </div>
                     <h3 class="fs-2">Mobile Friendly</h3>
-                    <p>Access your library from any device, anywhere.</p>
+                    <p class="px-3">Access your library from any device, anywhere.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Call to Action -->
-    <div class="bg-light py-5">
-        <div class="container text-center py-5">
-            <h2 class="display-6 mb-4">Ready to explore your library?</h2>
-            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-4 gap-3 btn-custom">Login Now</a>
-                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary btn-lg px-4 btn-custom">Create Account</a>
+    <div class="bg-light py-4 py-lg-5">
+        <div class="container text-center">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h2 class="display-6 mb-4">Ready to explore your library?</h2>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-4 gap-3 btn-custom">Login Now</a>
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary btn-lg px-4 btn-custom">Create Account</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </body>
 </html>

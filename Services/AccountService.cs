@@ -3,11 +3,6 @@ using LibraryAppMVC.Models;
 using LibraryAppMVC.Utilities;
 using LibraryAppMVC.ViewModels;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
-using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace LibraryAppMVC.Services
 {
@@ -129,6 +124,11 @@ namespace LibraryAppMVC.Services
 
             await _signInManager.SignOutAsync();
             return ResultTask<bool>.Success(true);
+        }
+        public async Task<ResultTask<bool>> LogoutAsync()
+        {
+            await _signInManager.SignOutAsync();
+           return ResultTask<bool>.Success(true);
         }
     }
 }

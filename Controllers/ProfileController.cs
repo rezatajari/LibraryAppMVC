@@ -7,7 +7,7 @@ using LibraryAppMVC.Interfaces;
 
 namespace LibraryAppMVC.Controllers
 {
-  // [Authorize]
+ [Authorize]
     public class ProfileController(IProfileService profileService) : Controller
     {
         private readonly IProfileService _profileService = profileService;
