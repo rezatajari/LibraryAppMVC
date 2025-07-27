@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAppMVC.Controllers
 {
+
+    [Authorize]
     public class LibraryController(IBookService bookService) : Controller
     {
         [HttpGet(template: "library/home")]
@@ -14,7 +16,6 @@ namespace LibraryAppMVC.Controllers
         {
             return View();
         }
-
         [HttpGet(template: "library/Add")]
         public IActionResult Add()
         {
@@ -41,7 +42,7 @@ namespace LibraryAppMVC.Controllers
                 if (result.Succeeded)
                 {
                     TempData["SuccessMessage"] = "Book added successfully!";
-                    return RedirectToAction("Home");
+                    return View();
                 }
 
                 ModelState.AddModelError(string.Empty, errorMessage: result.ErrorMessage ?? "Add failed");
@@ -52,9 +53,8 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction(controllerName: "home", actionName: "Error");
             }
         }
-
-        [HttpPost(template: "library/remove")]
-        public async Task<IActionResult> Remove(BookViewModel model)
+        [HttpPost(template: "library/remove/{id}")]
+        public async Task<IActionResult> Remove(int id)
         {
             try
             {
@@ -66,14 +66,14 @@ namespace LibraryAppMVC.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                var result = await bookService.Remove(model, userId);
+                var result = await bookService.Remove(id, userId);
                 if (!result.Succeeded)
                 {
                     TempData["ErrorMessage"] = result.ErrorMessage;
                     return RedirectToAction("List");
                 }
 
-                TempData["RemoveMessage"] = "Book Removed!";
+                TempData["SuccessMessage"] = "Book Removed!";
                 return RedirectToAction("List");
             }
             catch (Exception e)
@@ -81,7 +81,6 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction(controllerName: "home", actionName: "Error");
             }
         }
-
         [HttpGet(template: "library/list")]
         public async Task<IActionResult> List()
         {
@@ -106,7 +105,6 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction(controllerName: "home", actionName: "Error");
             }
         }
-
         [HttpGet, Route(template: "Library/Search")]
         public IActionResult Search()
         {
@@ -138,36 +136,6 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction(controllerName: "home", actionName: "Error");
             }
         }
-
-        [HttpPost(template: "Library/Delete/{title}")]
-        public async Task<IActionResult> Delete(string title)
-        {
-            try
-            {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userId == null)
-                {
-                    TempData["ErrorMessage"] = "User not logged in";
-                    return RedirectToAction(actionName: "login", controllerName: "Account");
-                }
-
-                var result = await bookService.Delete(userId, title);
-                if (!result.Succeeded)
-                {
-                    TempData["ErrorMessage"] = "Can not delete your book";
-                    return RedirectToAction("Search");
-                }
-
-                TempData["Successfully"] = "Your book deleted";
-                return RedirectToAction("Search");
-            }
-            catch (Exception e)
-            {
-                return RedirectToAction(controllerName: "home", actionName: "Error");
-            }
-
-        }
-
         [HttpGet(template: "Library/BookDetails/{id}")]
         public async Task<IActionResult> BookDetails(int id)
         {
@@ -195,8 +163,7 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction(controllerName: "home", actionName: "Error");
             }
         }
-
-        [HttpGet("[action]/{id}")]
+        [HttpGet(template:"[action]/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
             try
@@ -226,9 +193,7 @@ namespace LibraryAppMVC.Controllers
                 return RedirectToAction("List");
             }
         }
-
-        [Authorize]
-        [HttpPost("[action]/{id}")]
+        [HttpPost(template:"[action]/{id}")]
         public async Task<IActionResult> Edit(int id, BookViewModel model)
         {
             try

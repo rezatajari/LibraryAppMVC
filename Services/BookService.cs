@@ -39,20 +39,14 @@ namespace LibraryAppMVC.Services
             return ResultTask<bool>.Success(true);
 
         }
-        public async Task<ResultTask<bool>> Remove(BookViewModel model, string userId)
+        public async Task<ResultTask<bool>> Remove(int bookId, string userId)
         {
-            // Check book exist or not
-            var checkBookExist = await BookValidationExist(model, userId);
-            if (!checkBookExist.Succeeded)
-                return ResultTask<bool>.Failure("This book is not exist");
-
-            // Get book by title
-            var book = await GetBookByTitle(model.Title, userId);
+            var book = await bookRepository.GetById(bookId);
 
             // Remove operation
-            if (book.Data != null)
+            if (book != null)
             {
-                var result = await bookRepository.Remove(book.Data);
+                var result = await bookRepository.Remove(book);
                 if (!result.Succeeded)
                 {
                     logger.LogError(result.ErrorMessage);
@@ -60,7 +54,7 @@ namespace LibraryAppMVC.Services
                 }
             }
 
-            logger.LogInformation("Book {model.Title} removed successfully.", model.Title);
+            logger.LogInformation("Book {model.Title} removed successfully.", book.Title);
             return ResultTask<bool>.Success(true);
         }
         public async Task<ResultTask<ListBookViewModel>> GetAll(string userId)
