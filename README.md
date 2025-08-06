@@ -4,6 +4,19 @@ A modern ASP.NET Core MVC web application for managing a library system, featuri
 
 ---
 
+## 🌐 Live Demo
+
+🔗 [Visit Live Website](http://rezatajari-001-site1.qtempurl.com/)
+
+---
+
+## Application Demo  
+### 1. User Panel
+![Initial Setup](https://github.com/rezatajari/LibraryAppMVC/blob/master/Demo.png)  
+*Book Management panel*
+
+---
+
 ## Features
 
 - User registration, login, and profile management (with email confirmation)
