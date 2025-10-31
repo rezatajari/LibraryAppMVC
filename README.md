@@ -111,3 +111,22 @@ A modern ASP.NET Core MVC web application for managing a library system, featuri
 
 ## Contributing
 Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+## New Version (coming soon)
+Now I choose to build new version of this application like blow structure
+
+                   ┌─────────────────────────────┐
+                   │         Angular App          │
+                   │ (SPA, Routing, Material UI)  │
+                   └──────────────┬───────────────┘
+                                  │ REST / HTTPS
+                   ┌──────────────┴───────────────┐
+                   │        .NET 8 Web API        │
+                   │ (Clean Architecture Layers)  │
+                   │   Application / Domain / DB  │
+                   └──────────────┬───────────────┘
+                                  │ EF Core
+                            ┌─────┴─────┐
+                            │ SQLServer │
+                            └───────────┘
+
