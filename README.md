@@ -130,3 +130,99 @@ Now I choose to build new version of this application like blow structure
                             │ SQLServer │
                             └───────────┘
 
+## Core Idea of Clean Architecture
+
+**Goal:** Separate code by **dependency direction**, not by technical concerns.
+
+* **High-level policies** (business rules) should not depend on **low-level details** (frameworks, DB, UI).
+* Dependencies **always point inward**: Outer layers depend on inner layers, never the other way around.
+
+**Layers (from inside out):**
+
+1. **Domain Layer (Entities / Business Rules)**
+
+   * Core business concepts
+   * Entities: `Book`, `User`, `Loan`
+   * Pure C# classes, **no EF, no API, no UI**
+   * Contains **business logic** if needed (optional for small apps)
+
+2. **Application Layer (Use Cases / Services)**
+
+   * Orchestrates operations using Domain entities
+   * Defines **interfaces** (ports) for external dependencies: e.g., `IBookRepository`
+   * Handles workflows, validation, rules
+   * Independent of frameworks, testable
+
+3. **Infrastructure Layer**
+
+   * Implements interfaces from Application layer
+   * EF Core repositories, DB context, logging, caching
+   * Only here can you depend on frameworks
+
+4. **API Layer / Presentation Layer**
+
+   * Controllers, endpoints, Angular calls
+   * Converts Application results to DTOs
+   * Depends **on Application layer**, but not on Infrastructure implementation
+
+---
+
+## How it maps to your LibraryApp v3
+
+```
+/LibraryAppMVC
+│
+├─ /NewApp
+│   ├─ /ServerApp (.NET API)
+│   │    ├─ /Domain                  <-- Entities + business rules
+│   │    │    ├─ Book.cs
+│   │    │    ├─ User.cs
+│   │    │    └─ Loan.cs
+│   │    │
+│   │    ├─ /Application             <-- Use cases, interfaces
+│   │    │    ├─ Interfaces
+│   │    │    │    └─ IBookRepository.cs
+│   │    │    ├─ Services
+│   │    │    │    └─ LoanService.cs
+│   │    │    └─ DTOs
+│   │    │         └─ BookDTO.cs
+│   │    │
+│   │    ├─ /Infrastructure          <-- EF Core, Repositories, DB
+│   │    │    ├─ BookRepository.cs
+│   │    │    └─ LibraryDbContext.cs
+│   │    │
+│   │    └─ /API                     <-- Controllers, endpoints
+│   │         ├─ BooksController.cs
+│   │         └─ UsersController.cs
+│   │
+│   └─ /ClientApp (Angular)
+│        ├─ /components
+│        └─ /services
+│
+└─ /OldApp (Razor Pages v1)
+```
+
+---
+
+## Key Principles for Your v2
+
+1. **Dependency Rule:**
+
+   * API → Application → Domain
+   * Infrastructure implements interfaces in Application → depends inward
+
+2. **Interfaces / Abstractions:**
+
+   * Application layer defines `IBookRepository`
+   * Infrastructure layer implements it (EF Core)
+   * Controllers depend on Application services, not Infrastructure
+
+3. **Testability:**
+
+   * Domain + Application layers can be **tested independently** (no DB, no API)
+
+4. **Scalability:**
+
+   * Can add Angular modules, new API versions, or even replace Infrastructure (e.g., swap EF Core for Mongo) without touching Domain/Application
+
+---
