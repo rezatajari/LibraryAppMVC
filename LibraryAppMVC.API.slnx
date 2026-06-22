@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="LibraryAppMVC.API/LibraryAppMVC.API.csproj" />
+  <Project Path="LibraryAppMVC.Client/LibraryAppMVC.Client.csproj" />
+  <Project Path="LibraryAppMVC.Shared/LibraryAppMVC.Shared.csproj" />
 </Solution>
