@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/Books/">
-    <Project Path="../Application/Application.csproj" />
-    <Project Path="../Domain/Domain.csproj" />
-    <Project Path="../Infrastructure/Infrastructure.csproj" />
-  </Folder>
-  <Project Path="Library.csproj" />
-</Solution>
