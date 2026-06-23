@@ -44,12 +44,10 @@ else
     {
         try
         {
-            // ارسال درخواست به بک‌اند برای گرفتن لیست کتاب‌ها
             books = await Http.GetFromJsonAsync<List<Book>>("api/books");
         }
         catch (Exception ex)
         {
-            // کثیف و ساده (KISS): فعلاً خطا رو فقط توی کنسول چاپ می‌کنیم
             Console.WriteLine($"خطا در دریافت اطلاعات: {ex.Message}");
         }
     }
