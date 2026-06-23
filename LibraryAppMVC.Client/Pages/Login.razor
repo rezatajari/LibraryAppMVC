@@ -1,0 +1,108 @@
+﻿@page "/login"
+@using LibraryAppMVC.Shared.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white text-center py-3">
+                    <h4 class="mb-0">@(isRegisterMode ? "Create Account" : "Library Login")</h4>
+                </div>
+                <div class="card-body p-4">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger py-2 small">@errorMessage</div>
+                    }
+
+                    <EditForm Model="@userModel" OnValidSubmit="HandleSubmit">
+                        @if (isRegisterMode)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" @bind-value="userModel.FullName" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" @bind-value="userModel.PhoneNumber" />
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" @bind-value="userModel.Email" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" @bind-value="userModel.Password" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-dark w-100 mb-3">
+                            @(isRegisterMode ? "Sign Up" : "Sign In")
+                        </button>
+
+                        <div class="text-center">
+                            <button type="button" class="btn btn-link btn-sm text-decoration-none text-muted" @onclick="ToggleMode">
+                                @(isRegisterMode ? "Already have an account? Login" : "Don't have an account? Register")
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private User userModel = new();
+    private bool isRegisterMode = false;
+    private string errorMessage = string.Empty;
+
+    private void ToggleMode()
+    {
+        isRegisterMode = !isRegisterMode;
+        userModel = new User();
+        errorMessage = string.Empty;
+    }
+
+    private async Task HandleSubmit()
+    {
+        errorMessage = string.Empty;
+        try
+        {
+            HttpResponseMessage response;
+
+            if (isRegisterMode)
+            {
+                response = await Http.PostAsJsonAsync("api/users/register", userModel);
+            }
+            else
+            {
+                response = await Http.PostAsJsonAsync("api/users/login", userModel);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                var loggedInUser = await response.Content.ReadFromJsonAsync<User>();
+                if (loggedInUser != null)
+                {
+                    await JSRuntime.InvokeVoidAsync("localStorage.setItem", "user_name", loggedInUser.FullName);
+
+                    // هدایت کاربر به صفحه اصلی یا دشبورد
+                    Navigation.NavigateTo("/dashbaord");
+                }
+            }
+            else
+            {
+                errorMessage = await response.Content.ReadAsStringAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+}
