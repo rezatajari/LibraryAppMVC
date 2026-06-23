@@ -45,4 +45,30 @@ public class UsersController(LibraryDbContext context) : ControllerBase
 
         return Ok(user);
     }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(User loginInfo)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == loginInfo.Email);
+        if (user == null)
+        {
+            return BadRequest("Invalid Email or Password.");
+        }
+
+        var passwordHasher = new PasswordHasher<User>();
+        var verificationResult = passwordHasher.VerifyHashedPassword(user, user.Password, loginInfo.Password);
+
+        if (verificationResult == PasswordVerificationResult.Failed)
+        {
+            return BadRequest("Invalid Email or Password.");
+        }
+
+        return Ok(user);
+    }
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        return Ok(new { message = "Logged out successfully" });
+    }
 }
