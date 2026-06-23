@@ -24,5 +24,18 @@ namespace LibraryAppMVC.API.Controllers
 
             return Created();
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Book>> GetBook(int id)
+        {
+            var book = await context.Books.FindAsync(id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            return book;
+        }
     }
 }
