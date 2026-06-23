@@ -2,6 +2,7 @@
 using LibraryAppMVC.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace LibraryAppMVC.API.Controllers
 {
@@ -36,6 +37,35 @@ namespace LibraryAppMVC.API.Controllers
             }
 
             return book;
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutBook(int id, Book book)
+        {
+            if (id != book.Id)
+            {
+                return BadRequest();
+            }
+
+           context.Entry(book).State = EntityState.Modified;
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!context.Books.Any(e => e.Id == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
     }
 }
