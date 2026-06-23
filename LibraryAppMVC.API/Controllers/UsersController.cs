@@ -1,4 +1,5 @@
 ﻿using LibraryAppMVC.API.Data;
+using LibraryAppMVC.API.Migrations;
 using LibraryAppMVC.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,10 @@ public class UsersController(LibraryDbContext context) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<User>>> GetUsers()
     {
-        return await context.Users.ToListAsync();
+        List<User> users = await context.Users.ToListAsync();
+        if (users.Count == 0)
+            return BadRequest("Any user is not fournd");
+        return Ok(users);
     }
 
     [HttpPost]
