@@ -63,6 +63,8 @@
         try
         {
             userName = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "user_name");
+
+            StateHasChanged();
         }
         catch (Exception ex)
         {
