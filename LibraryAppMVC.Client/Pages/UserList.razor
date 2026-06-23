@@ -101,8 +101,8 @@ else
 
             if (response.IsSuccessStatusCode)
             {
-                newUser = new User(); // ریست کردن فرم
-                await LoadUsers(); // رفرش آنی جدول
+                newUser = new User();
+                await LoadUsers();
             }
         }
         catch (Exception ex)
