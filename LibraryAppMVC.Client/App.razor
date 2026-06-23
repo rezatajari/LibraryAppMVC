@@ -1,6 +1,62 @@
-﻿<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+﻿@inject NavigationManager Nav
+@inject IJSRuntime JSRuntime
+
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        @if (isCheckingAuth)
+        {
+            <div class="d-flex justify-content-center align-items-center min-vh-100">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Checking authorization...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        }
     </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p role="alert">Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
 </Router>
+
+@code {
+    private bool isCheckingAuth = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await CheckUserAuthorization();
+    }
+
+    private async Task CheckUserAuthorization()
+    {
+        isCheckingAuth = true;
+
+        try
+        {
+            var userName = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "user_name");
+            var currentRelativePath = Nav.ToBaseRelativePath(Nav.Uri).ToLower();
+
+            if (string.IsNullOrEmpty(userName) && !currentRelativePath.StartsWith("login"))
+            {
+                Nav.NavigateTo("login");
+            }
+            else if (!string.IsNullOrEmpty(userName) && currentRelativePath.StartsWith("login"))
+            {
+                Nav.NavigateTo("/");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Auth check error: {ex.Message}");
+        }
+        finally
+        {
+            isCheckingAuth = false;
+        }
+    }
+}

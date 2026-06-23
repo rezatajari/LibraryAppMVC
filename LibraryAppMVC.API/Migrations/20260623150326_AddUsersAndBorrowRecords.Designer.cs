@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryAppMVC.API.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    [Migration("20260623141927_user")]
-    partial class user
+    [Migration("20260623150326_AddUsersAndBorrowRecords")]
+    partial class AddUsersAndBorrowRecords
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,12 +105,16 @@ namespace LibraryAppMVC.API.Migrations
                     b.Property<DateTime>("MembershipDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("LibraryAppMVC.Shared.Models.BorrowRecord", b =>

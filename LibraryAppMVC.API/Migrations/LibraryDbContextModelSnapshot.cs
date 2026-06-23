@@ -102,6 +102,10 @@ namespace LibraryAppMVC.API.Migrations
                     b.Property<DateTime>("MembershipDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
