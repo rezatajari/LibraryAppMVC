@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject HttpClient Http
+@inject NavigationManager Nav
+@inject IJSRuntime JSRuntime
 
 <div class="container-fluid">
     <div class="row">
@@ -23,6 +25,21 @@
                     <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="users">
                         <i class="bi bi-people-fill"></i> Users Management
                     </NavLink>
+                </li>
+                <li class="nav-item mt-4 pt-4 border-top">
+                    @if (!string.IsNullOrEmpty(userName))
+                    {
+                        <div class="px-3 mb-2 small text-muted">Logged in as: <br /><strong class="text-white">@userName</strong></div>
+                        <button class="btn btn-sm btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2" @onclick="HandleLogout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    }
+                    else
+                    {
+                        <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="login">
+                            <i class="bi bi-box-arrow-in-right"></i> Login / Register
+                        </NavLink>
+                    }
                 </li>
             </ul>
         </nav>
