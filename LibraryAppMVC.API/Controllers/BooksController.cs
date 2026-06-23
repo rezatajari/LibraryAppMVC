@@ -67,5 +67,20 @@ namespace LibraryAppMVC.API.Controllers
 
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBook(int id)
+        {
+            var book = await context.Books.FindAsync(id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            context.Books.Remove(book);
+            await context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
