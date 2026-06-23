@@ -194,8 +194,7 @@ else
 
         try
         {
-            // هماهنگی دقیق با آدرس جدید بک‌اَند کنترلر امانت
-            var response = await Http.PostAsync($"api/borrow/borrow?bookId={selectedBookId}&userId={selectedUserId}", null);
+            var response = await Http.PostAsync($"api/borrow?bookId={selectedBookId}&userId={selectedUserId}", null);
 
             if (response.IsSuccessStatusCode)
             {
