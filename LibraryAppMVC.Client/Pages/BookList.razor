@@ -1,0 +1,56 @@
+﻿@page "/books"
+@using LibraryAppMVC.Shared.Models
+@inject HttpClient Http
+
+<h3 class="mb-4">مدیریت کتاب‌ها</h3>
+
+@if (books == null)
+{
+    <p><em>در حال بارگذاری کتاب‌ها...</em></p>
+}
+else if (!books.Any())
+{
+    <div class="alert alert-info">هیچ کتابی در کتابخانه ثبت نشده است.</div>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>شناسه</th>
+                <th>عنوان کتاب</th>
+                <th>نویسنده</th>
+                <th>سال انتشار</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in books)
+            {
+                <tr>
+                    <td>@book.Id</td>
+                    <td>@book.Title</td>
+                    <td>@book.Author</td>
+                    <td>@book.YearPublished</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Book>? books;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // ارسال درخواست به بک‌اند برای گرفتن لیست کتاب‌ها
+            books = await Http.GetFromJsonAsync<List<Book>>("api/books");
+        }
+        catch (Exception ex)
+        {
+            // کثیف و ساده (KISS): فعلاً خطا رو فقط توی کنسول چاپ می‌کنیم
+            Console.WriteLine($"خطا در دریافت اطلاعات: {ex.Message}");
+        }
+    }
+}
