@@ -217,4 +217,30 @@ else
             Console.WriteLine($"Error returning book: {ex.Message}");
         }
     }
+
+    private async Task OpenBorrowModal(int bookId)
+    {
+        try
+        {
+            string borrowerName = await JSRuntime.InvokeAsync<string>("prompt", "Enter Borrower's Name:");
+
+            if (!string.IsNullOrWhiteSpace(borrowerName))
+            {
+                var response = await Http.PostAsJsonAsync($"api/borrow?bookId={bookId}", borrowerName);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    await LoadBooks();
+                }
+                else
+                {
+                    Console.WriteLine("Failed to borrow the book.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error processing borrow action: {ex.Message}");
+        }
+    }
 }
