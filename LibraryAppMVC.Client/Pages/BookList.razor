@@ -2,25 +2,25 @@
 @using LibraryAppMVC.Shared.Models
 @inject HttpClient Http
 
-<h3 class="mb-4">مدیریت کتاب‌ها</h3>
+<h3 class="mb-4">Books Management</h3>
 
 @if (books == null)
 {
-    <p><em>در حال بارگذاری کتاب‌ها...</em></p>
+    <p><em>Loading books...</em></p>
 }
 else if (!books.Any())
 {
-    <div class="alert alert-info">هیچ کتابی در کتابخانه ثبت نشده است.</div>
+    <div class="alert alert-info">No books registered in the library yet.</div>
 }
 else
 {
-    <table class="table table-striped table-bordered">
+    <table class="table table-striped table-bordered align-middle">
         <thead class="table-dark">
             <tr>
-                <th>شناسه</th>
-                <th>عنوان کتاب</th>
-                <th>نویسنده</th>
-                <th>سال انتشار</th>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Year Published</th>
             </tr>
         </thead>
         <tbody>
@@ -44,11 +44,13 @@ else
     {
         try
         {
+            // Fetching books from the .NET API
             books = await Http.GetFromJsonAsync<List<Book>>("api/books");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"خطا در دریافت اطلاعات: {ex.Message}");
+            // Simple logging to browser console (KISS)
+            Console.WriteLine($"Error fetching data: {ex.Message}");
         }
     }
 }

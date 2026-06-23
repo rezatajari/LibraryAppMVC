@@ -1,4 +1,30 @@
 ﻿@inherits LayoutComponentBase
 
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-3 col-lg-2 d-md-block bg-dark min-vh-100 text-white p-3">
+            <div class="fs-4 mb-4 text-center border-bottom pb-2">
+                <i class="bi bi-book-half me-2"></i> Library System
+            </div>
 
-@Body
+            <ul class="nav nav-pills flex-column mb-auto ps-0">
+                <li class="nav-item mb-2">
+                    <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="" Match="NavLinkMatch.All">
+                        <i class="bi bi-house-door"></i> Dashboard
+                    </NavLink>
+                </li>
+                <li class="nav-item mb-2">
+                    <NavLink class="nav-link text-white d-flex align-items-center gap-2" href="books">
+                        <i class="bi bi-collection"></i> Books List
+                    </NavLink>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4">
+            <div class="card shadow-sm p-4">
+                @Body
+            </div>
+        </main>
+    </div>
+</div>
