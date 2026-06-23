@@ -55,12 +55,15 @@
 @code {
     private string? userName;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnParametersSetAsync()
     {
-        if (firstRender)
+        try
         {
             userName = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "user_name");
-            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reading storage in layout: {ex.Message}");
         }
     }
 
