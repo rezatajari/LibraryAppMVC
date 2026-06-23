@@ -184,6 +184,27 @@ else
         selectedUserId = 0; 
     }
 
+    private async Task SubmitBorrow()
+    {
+        if (selectedBookId == 0 || selectedUserId == 0) return;
+
+        try
+        {
+            var response = await Http.PostAsync($"api/borrow?bookId={selectedBookId}&userId={selectedUserId}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                CancelBorrow();
+                await LoadBooks();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error submitting borrow: {ex.Message}");
+        }
+    }
+
+
     private async Task HandleCreateBook()
     {
         try
