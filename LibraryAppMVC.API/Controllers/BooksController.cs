@@ -22,8 +22,7 @@ namespace LibraryAppMVC.API.Controllers
             context.Books.Add(book);
             await context.SaveChangesAsync();
 
-            // برگرداندن وضعیت 201 Created به همراه آدرس دسترسی به این کتاب و خود شیء ساخته شده
-            return CreatedAtAction(nameof(GetBooks), new { id = book.Id }, book);
+            return Created();
         }
     }
 }
