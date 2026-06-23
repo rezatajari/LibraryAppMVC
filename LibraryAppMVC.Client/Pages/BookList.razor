@@ -51,6 +51,7 @@ else
                 <th>Title</th>
                 <th>Author</th>
                 <th>Year Published</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -61,6 +62,11 @@ else
                     <td>@book.Title</td>
                     <td>@book.Author</td>
                     <td>@book.YearPublished</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" @onclick="() => PrepareEdit(book)">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -70,6 +76,7 @@ else
 @code {
     private List<Book>? books;
     private Book newBook = new();
+    private bool isEditMode = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -105,5 +112,17 @@ else
         {
             Console.WriteLine($"Error creating book: {ex.Message}");
         }
+    }
+
+    private void PrepareEdit(Book book)
+    {
+        newBook = new Book
+        {
+            Id = book.Id,
+            Title = book.Title,
+            Author = book.Author,
+            YearPublished = book.YearPublished
+        };
+        isEditMode = true;
     }
 }
