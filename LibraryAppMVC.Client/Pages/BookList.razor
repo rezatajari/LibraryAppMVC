@@ -142,4 +142,27 @@ else
         };
         isEditMode = true;
     }
+
+    private async Task HandleDeleteBook(int id)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/books/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                if (newBook.Id == id)
+                {
+                    newBook = new Book();
+                    isEditMode = false;
+                }
+
+                await LoadBooks();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting book: {ex.Message}");
+        }
+    }
 }
