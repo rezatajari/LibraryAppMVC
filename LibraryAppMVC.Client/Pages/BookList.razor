@@ -2,13 +2,15 @@
 @using LibraryAppMVC.Shared.Models
 @using System.Net.Http.Json
 @inject HttpClient Http
-@inject IJSRuntime JSRuntime
 
 <h3 class="mb-4">Books Management</h3>
 
 <div class="card mb-4 shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <h5 class="card-title mb-0"><i class="bi bi-plus-circle me-2"></i>Add New Book</h5>
+    <div class="card-header @(isEditMode ? "bg-warning text-dark" : "bg-primary text-white")">
+        <h5 class="card-title mb-0">
+            <i class="bi @(isEditMode ? "bi-pencil-square" : "bi-plus-circle") me-2"></i>
+            @(isEditMode ? "Edit Book Details" : "Add New Book")
+        </h5>
     </div>
     <div class="card-body">
         <EditForm Model="@newBook" OnValidSubmit="HandleCreateBook">
@@ -25,15 +27,12 @@
                     <label class="form-label">Year Published</label>
                     <input type="number" class="form-control" @bind-value="newBook.YearPublished" required />
                 </div>
-                <h5 class="card-title mb-0">
-                    <i class="bi @(isEditMode ? "bi-pencil-square" : "bi-plus-circle") me-2"></i>
-                    @(isEditMode ? "Edit Book Details" : "Add New Book")
-                </h5>
-
-                <button type="submit" class="btn @(isEditMode ? "btn-warning" : "btn-success") w-100">
-                    <i class="bi @(isEditMode ? "bi-arrow-clockwise" : "bi-check-lg") me-1"></i>
-                    @(isEditMode ? "Update" : "Save Book")
-                </button>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn @(isEditMode ? "btn-warning" : "btn-success") w-100">
+                        <i class="bi @(isEditMode ? "bi-arrow-clockwise" : "bi-check-lg") me-1"></i>
+                        @(isEditMode ? "Update" : "Save Book")
+                    </button>
+                </div>
             </div>
         </EditForm>
     </div>
@@ -42,7 +41,7 @@
 @if (selectedBookId > 0)
 {
     <div class="card mb-4 border-primary shadow-sm">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-middle">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0" style="font-size: 1rem;"><i class="bi bi-box-arrow-up me-2"></i>Borrowing Book Process</h5>
             <button type="button" class="btn-close btn-close-white" @onclick="CancelBorrow"></button>
         </div>
@@ -72,7 +71,6 @@
     </div>
 }
 
-
 @if (books == null)
 {
     <p><em>Loading books...</em></p>
@@ -99,7 +97,7 @@ else
             {
                 <tr>
                     <td>@book.Id</td>
-                    <td>@book.Title</td>
+                    <td class="fw-semibold">@book.Title</td>
                     <td>@book.Author</td>
                     <td>@book.YearPublished</td>
                     <td>
