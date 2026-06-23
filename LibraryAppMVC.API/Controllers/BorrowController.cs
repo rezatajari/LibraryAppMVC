@@ -50,7 +50,6 @@ public class BorrowController(LibraryDbContext context) : ControllerBase
             return NotFound("No active borrow record found for this book.");
         }
 
-        // ۲. ثبت تاریخ بازگشت و آزاد کردن وضعیت کتاب
         record.ReturnDate = DateTime.Now;
         book.IsAvailable = true;
 
