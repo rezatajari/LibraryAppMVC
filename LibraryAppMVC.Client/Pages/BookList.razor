@@ -39,6 +39,40 @@
     </div>
 </div>
 
+@if (selectedBookId > 0)
+{
+    <div class="card mb-4 border-primary shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-middle">
+            <h5 class="card-title mb-0" style="font-size: 1rem;"><i class="bi bi-box-arrow-up me-2"></i>Borrowing Book Process</h5>
+            <button type="button" class="btn-close btn-close-white" @onclick="CancelBorrow"></button>
+        </div>
+        <div class="card-body bg-light">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Select Member / User</label>
+                    <select class="form-select" @bind="selectedUserId">
+                        <option value="0">-- Choose a member --</option>
+                        @if (users != null)
+                        {
+                            @foreach (var user in users)
+                            {
+                                <option value="@user.Id">@user.FullName (@user.Email)</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-success me-2" @onclick="SubmitBorrow" disabled="@(selectedUserId == 0)">
+                        <i class="bi bi-check-circle-fill me-1"></i> Confirm Loan
+                    </button>
+                    <button class="btn btn-secondary" @onclick="CancelBorrow">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 @if (books == null)
 {
     <p><em>Loading books...</em></p>
@@ -88,7 +122,7 @@ else
                             </button>
                             @if (book.IsAvailable)
                             {
-                                <button class="btn btn-sm btn-outline-primary" @onclick="() => OpenBorrowModal(book.Id)">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => SetBookForBorrow(book.Id)">
                                     <i class="bi bi-box-arrow-up"></i> Borrow
                                 </button>
                             }
