@@ -15,5 +15,15 @@ namespace LibraryAppMVC.API.Controllers
             var books = await context.Books.ToListAsync();
             return Ok(books);
         }
+
+        [HttpPost]
+        public async Task<ActionResult<Book>> CreateBook(Book book)
+        {
+            context.Books.Add(book);
+            await context.SaveChangesAsync();
+
+            // برگرداندن وضعیت 201 Created به همراه آدرس دسترسی به این کتاب و خود شیء ساخته شده
+            return CreatedAtAction(nameof(GetBooks), new { id = book.Id }, book);
+        }
     }
 }
