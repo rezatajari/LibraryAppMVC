@@ -199,4 +199,21 @@ else
             Console.WriteLine($"Error deleting book: {ex.Message}");
         }
     }
+
+    private async Task HandleReturnBook(int bookId)
+    {
+        try
+        {
+            var response = await Http.PostAsync($"api/borrow/return/{bookId}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadBooks();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error returning book: {ex.Message}");
+        }
+    }
 }
