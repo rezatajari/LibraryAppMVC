@@ -21,6 +21,6 @@ public class UsersController(LibraryDbContext context) : ControllerBase
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetUsers), new { id = user.Id }, user);
+        return Created();
     }
 }

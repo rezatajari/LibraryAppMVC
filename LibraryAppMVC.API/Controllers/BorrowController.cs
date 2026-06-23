@@ -10,20 +10,26 @@ namespace LibraryAppMVC.API.Controllers;
 public class BorrowController(LibraryDbContext context) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> BorrowBook(int bookId, [FromBody] string borrowerName)
+    public async Task<IActionResult> BorrowBook(int bookId, int userId)
     {
         var book = await context.Books.FindAsync(bookId);
-
         if (book == null || !book.IsAvailable)
         {
             return BadRequest("Book is not available for borrowing.");
         }
+
+        var user = await context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return BadRequest("User not found.");
+        }
+
         book.IsAvailable = false;
 
         var record = new BorrowRecord
         {
             BookId = bookId,
-            BorrowerName = borrowerName,
+            UserId = userId,
             BorrowDate = DateTime.Now
         };
 
