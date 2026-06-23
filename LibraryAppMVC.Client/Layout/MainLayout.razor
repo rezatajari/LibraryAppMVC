@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject HttpClient Http
 
 <div class="container-fluid">
     <div class="row">
@@ -33,3 +34,29 @@
         </main>
     </div>
 </div>
+
+@code {
+    private string? userName;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            userName = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "user_name");
+            StateHasChanged(); 
+        }
+    }
+
+    private async Task HandleLogout()
+    {
+        try
+        {
+            await Http.PostAsync("api/users/logout", null);
+            await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "user_name");
+            userName = null;
+
+            @inject NavigationManager Nav
+        }
+        catch { }
+    }
+}
