@@ -91,8 +91,7 @@
                 {
                     await JSRuntime.InvokeVoidAsync("localStorage.setItem", "user_name", loggedInUser.FullName);
 
-                    // هدایت کاربر به صفحه اصلی یا دشبورد
-                    Navigation.NavigateTo("/dashbaord");
+                    Navigation.NavigateTo("/dashboard");
                 }
             }
             else
