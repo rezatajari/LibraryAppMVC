@@ -67,9 +67,15 @@ else
                     <td>@book.Author</td>
                     <td>@book.YearPublished</td>
                     <td>
-                        <button class="btn btn-sm btn-warning" @onclick="() => PrepareEdit(book)">
-                            <i class="bi bi-pencil-square"></i> Edit
-                        </button>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-warning" @onclick="() => PrepareEdit(book)">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </button>
+
+                            <button class="btn btn-sm btn-danger" @onclick="() => HandleDeleteBook(book.Id)">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
                     </td>
                 </tr>
             }
