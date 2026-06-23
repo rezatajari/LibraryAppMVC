@@ -143,11 +143,27 @@ else
 @code {
     private List<Book>? books;
     private Book newBook = new();
+    private List<User>? users;
     private bool isEditMode = false;
+    private int selectedBookId = 0;
+    private int selectedUserId = 0;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadBooks();
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            users = await Http.GetFromJsonAsync<List<User>>("api/users");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading users: {ex.Message}");
+        }
     }
 
     private async Task LoadBooks()
@@ -160,6 +176,12 @@ else
         {
             Console.WriteLine($"Error fetching data: {ex.Message}");
         }
+    }
+
+    private void SetBookForBorrow(int bookId)
+    {
+        selectedBookId = bookId;
+        selectedUserId = 0; 
     }
 
     private async Task HandleCreateBook()
