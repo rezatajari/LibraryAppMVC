@@ -1,6 +1,8 @@
 ﻿@page "/users"
+@attribute [Authorize]
 @using LibraryAppMVC.Shared.Models
 @using System.Net.Http.Json
+@using Microsoft.AspNetCore.Authorization
 @inject HttpClient Http
 
 <h3 class="mb-4">Users Management</h3>
