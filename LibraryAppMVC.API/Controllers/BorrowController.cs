@@ -14,16 +14,12 @@ public class BorrowController(LibraryDbContext context) : ControllerBase
     {
         var book = await context.Books.FindAsync(bookId);
 
-        // بررسی اینکه آیا کتاب وجود دارد و در حال حاضر موجود است یا خیر
         if (book == null || !book.IsAvailable)
         {
             return BadRequest("Book is not available for borrowing.");
         }
-
-        // ۱. تغییر وضعیت کتاب به امانت داده شده
         book.IsAvailable = false;
 
-        // ۲. ثبت رکورد جدید امانت
         var record = new BorrowRecord
         {
             BookId = bookId,
@@ -32,6 +28,32 @@ public class BorrowController(LibraryDbContext context) : ControllerBase
         };
 
         context.BorrowRecords.Add(record);
+        await context.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    [HttpPost("return/{bookId}")]
+    public async Task<IActionResult> ReturnBook(int bookId)
+    {
+        var book = await context.Books.FindAsync(bookId);
+        if (book == null || book.IsAvailable)
+        {
+            return BadRequest("Book was not borrowed or does not exist.");
+        }
+
+        var record = await context.BorrowRecords
+            .FirstOrDefaultAsync(r => r.BookId == bookId && r.ReturnDate == null);
+
+        if (record == null)
+        {
+            return NotFound("No active borrow record found for this book.");
+        }
+
+        // ۲. ثبت تاریخ بازگشت و آزاد کردن وضعیت کتاب
+        record.ReturnDate = DateTime.Now;
+        book.IsAvailable = true;
+
         await context.SaveChangesAsync();
 
         return Ok();
