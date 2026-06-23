@@ -1,5 +1,6 @@
 ﻿using LibraryAppMVC.API.Data;
 using LibraryAppMVC.Shared.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,5 +26,23 @@ public class UsersController(LibraryDbContext context) : ControllerBase
         await context.SaveChangesAsync();
 
         return Created();
+    }
+
+    [HttpPost("register")]
+    public async Task<ActionResult<User>> Register(User user)
+    {
+        var userExists = await context.Users.AnyAsync(u => u.Email == user.Email);
+        if (userExists)
+        {
+            return BadRequest("Email is already registered.");
+        }
+
+        var passwordHasher = new PasswordHasher<User>();
+        user.Password = passwordHasher.HashPassword(user, user.Password);
+
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        return Ok(user);
     }
 }
