@@ -1,8 +1,38 @@
 ﻿@page "/books"
 @using LibraryAppMVC.Shared.Models
+@using System.Net.Http.Json
 @inject HttpClient Http
 
 <h3 class="mb-4">Books Management</h3>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0"><i class="bi bi-plus-circle me-2"></i>Add New Book</h5>
+    </div>
+    <div class="card-body">
+        <EditForm Model="@newBook" OnValidSubmit="HandleCreateBook">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Book Title</label>
+                    <input type="text" class="form-control" @bind-value="newBook.Title" placeholder="e.g. Clean Code" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Author</label>
+                    <input type="text" class="form-control" @bind-value="newBook.Author" placeholder="e.g. Robert C. Martin" required />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Year Published</label>
+                    <input type="number" class="form-control" @bind-value="newBook.YearPublished" required />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-check-lg me-1"></i>Save Book
+                    </button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>
 
 @if (books == null)
 {
@@ -39,18 +69,41 @@ else
 
 @code {
     private List<Book>? books;
+    private Book newBook = new();
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadBooks();
+    }
+
+    private async Task LoadBooks()
+    {
         try
         {
-            // Fetching books from the .NET API
             books = await Http.GetFromJsonAsync<List<Book>>("api/books");
         }
         catch (Exception ex)
         {
-            // Simple logging to browser console (KISS)
             Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+    }
+
+    private async Task HandleCreateBook()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/books", newBook);
+
+            if (response.IsSuccessStatusCode)
+            {
+                newBook = new Book();
+
+                await LoadBooks();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating book: {ex.Message}");
         }
     }
 }
