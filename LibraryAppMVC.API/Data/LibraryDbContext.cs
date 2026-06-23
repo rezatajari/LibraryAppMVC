@@ -11,4 +11,5 @@ public class LibraryDbContext : DbContext
 
     public DbSet<Book> Books { get; set; }
     public DbSet<BorrowRecord> BorrowRecords { get; set; }
+    public DbSet<User> Users { get; set; }
 }
