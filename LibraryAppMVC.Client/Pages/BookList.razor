@@ -80,6 +80,12 @@ else
                     </td>
                     <td>
                         <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-warning" @onclick="() => PrepareEdit(book)">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => HandleDeleteBook(book.Id)">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
                             @if (book.IsAvailable)
                             {
                                 <button class="btn btn-sm btn-outline-primary" @onclick="() => OpenBorrowModal(book.Id)">
@@ -92,24 +98,6 @@ else
                                     <i class="bi bi-box-arrow-in-down"></i> Return
                                 </button>
                             }
-
-                            <button class="btn btn-sm btn-warning" @onclick="() => PrepareEdit(book)">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => HandleDeleteBook(book.Id)">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-warning" @onclick="() => PrepareEdit(book)">
-                                <i class="bi bi-pencil-square"></i> Edit
-                            </button>
-
-                            <button class="btn btn-sm btn-danger" @onclick="() => HandleDeleteBook(book.Id)">
-                                <i class="bi bi-trash"></i> Delete
-                            </button>
                         </div>
                     </td>
                 </tr>
