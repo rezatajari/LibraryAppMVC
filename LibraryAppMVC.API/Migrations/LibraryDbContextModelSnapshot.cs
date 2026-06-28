@@ -96,8 +96,7 @@ namespace LibraryAppMVC.API.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("MembershipDate")
                         .HasColumnType("datetime2");
