@@ -6,62 +6,77 @@ A minimalist, full-stack web application built using the **KISS (Keep It Simple,
 
 ## Key Features
 
-* **Secure Authentication & Registration:** Direct user registration with raw password hashing using native .NET `PasswordHasher`.
-* **Reactive Client-Side Route Guard:** Custom router configuration in Blazor utilizing `CascadingAuthenticationState` to block unauthorized access to core management links.
-* **Dynamic UI Navigation:** Context-aware navigation menu that reveals management options only to authenticated users, with a fast local-storage logout workflow.
-* **Books & Users Directories:** Full CRUD capability for tracking library inventory and active members.
+- Secure Authentication & Registration using ASP.NET `PasswordHasher`
+- Reactive client-side route protection in Blazor WASM
+- Dynamic navigation based on authentication state
+- Full CRUD for books and users
+- Lightweight API-first architecture
 
 ---
 
-## Domain Entities (Database Models)
+## System Screenshots
 
-The core business domain consists of simple, decoupled entities shared across both the API and client layers:
+<p align="center">
+  <img src="images/UserManagement.png" width="32%" />
+  <img src="images/BookList.png" width="32%" />
+  <img src="images/Dashboard.png" width="32%" />
+</p>
 
-### 1. User
+---
+
+## Domain Entities
+
+### User
 Represents a library member or system operator.
-* `Id` (int, Primary Key)
-* `FullName` (string, Required)
-* `Email` (string, Required, Unique)
-* `PhoneNumber` (string, Optional)
-* `Password` (string, Required, Stored as secure hash)
-* `MembershipDate` (DateTime, Defaulted to current time)
 
-### 2. Book
-Tracks individual assets inside the library catalog.
-* `Id` (int, Primary Key)
-* `Title` (string)
-* `Author` (string)
-* `YearPublished` (int)
-* `IsAvailable` (bool)
+- Id
+- FullName
+- Email
+- PhoneNumber
+- Password (hashed)
+- MembershipDate
+
+### Book
+Represents a library book in the catalog.
+
+- Id
+- Title
+- Author
+- YearPublished
+- IsAvailable
 
 ---
 
-## System Architecture & Views
+## System Architecture
 
-### Backend API (`UsersController`)
-Handles lightweight and direct database interaction without intermediate DTO overhead for rapid prototyping:
-* `POST /api/users/register` - Validates email uniqueness and hashes raw passwords before persistence.
-* `POST /api/users/login` - Computes cryptographic hash verification to initialize sessions.
-* `POST /api/users/logout` - Endpoint placeholder to trigger secure client-side token/session disposal.
+### Backend (ASP.NET Core Web API)
 
-### Frontend Pages (Blazor WebAssembly)
-* **`/login` (Authentication Hub):** Dual-purpose streamlined form that toggles seamlessly between Login and Registration states.
-* **`/dashboard`:** Landing space for registered users.
-* **`/books`:** Authorized system view to inspect, search, and manage book assets.
-* **`/users`:** Authorized control board to inspect and edit library user credentials.
+- User registration with password hashing
+- Login validation using `PasswordHasher`
+- Simple REST endpoints without DTO overhead (prototype-friendly)
+
+### Frontend (Blazor WebAssembly)
+
+- `/login` authentication page
+- `/dashboard` user landing page
+- `/books` book management
+- `/users` user management
+
+State managed via browser local storage.
 
 ---
 
 ## Technology Stack
 
-* **Backend:** .NET 8.0 / 9.0 Core Web API, Entity Framework Core (EF Core)
-* **Frontend:** Blazor WebAssembly (WASM), Bootstrap 5, Bootstrap Icons
-* **State Management:** Browser Local Storage via `IJSRuntime` Interop
+- ASP.NET Core 8/9 Web API
+- Entity Framework Core
+- Blazor WebAssembly
+- Bootstrap 5
 
 ---
 
 ## Getting Started
 
-1. Apply migrations to update your local database:
-   ```bash
-   dotnet ef database update
+### 1. Clone repository
+```bash
+git clone <repo-url>
