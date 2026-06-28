@@ -16,14 +16,14 @@ A minimalist, full-stack web application built using the **KISS (Keep It Simple,
 
 ## System Screenshots
 
-**User Management**
-<img src="images/UserManagement.png" width="95%" />
+**Dashboard**
+<img src="images/Dashboard.png" width="95%" />
 
 **Book List**
 <img src="images/BookList.png" width="95%" />
 
-**Dashboard**
-<img src="images/Dashboard.png" width="95%" />
+**User Management**
+<img src="images/UserManagement.png" width="95%" />
 
 ---
 
